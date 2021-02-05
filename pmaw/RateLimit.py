@@ -1,5 +1,6 @@
 import logging
 import time
+import random
 
 log = logging.getLogger(__name__)
 
@@ -10,25 +11,74 @@ class RateLimit(object):
 
     Input:
         rate_limit (int, optional) - Maximum number of requests per minute, defaults to 60 requests per minute.
-        limit_type (str, optional) - Type of rate limiting to use, default value is 'mean' for rate averaging
+        base_backoff (float, optional) - Base delay in seconds for backoff, defaults to 0.5s.
+        limit_type (str, optional) - Type of rate limiting to use, default value is 'average' for rate averaging.
+        max_sleep (int, optional) - Maximum rate-limit sleep time (in seconds) between requests, defaults to 60s.
+        jitter (str, optional) - Jitter to use with backoff, defaults to None, options are None, full, equal, decorr
     """
 
-    def __init__(self, rate_limit=60, limit_type='mean'):
+    def __init__(self, rate_limit=60, base_backoff=0.5, limit_type='average', max_sleep=60, jitter=None):
         self.rate_limit = rate_limit
         self.cache = list()
+        self.base = base_backoff
         self.limit_type = limit_type
+        self.max_sleep = max_sleep
+        self.jitter = jitter
+        self.sleep = self.base
 
-    def _rate_limit(self, period, num_req):
-        if self.limit_type == 'mean':
-            # calculating delay required based on rate averaging
-            return 60*(num_req)/self.rate_limit - period
+        # track failures and attempts
+        self.last_batch = 0
+        self.attempts = 0
+        self.num_fail = 0
+
+    def delay(self):
+        if self.limit_type:
+            if self.limit_type == 'average':
+                return min(self.max_sleep, self._average())
+            elif self.limit_type == 'backoff':
+                return self._backoff()
         else:
             return 0
 
-    def req(self):
+    def _req_fail(self):
+        self.num_fail += 1
+
+    def _check_fail(self):
+        # reset attempts if no new failures
+        if self.last_batch == self.num_fail:
+            self.num_fail = 0
+            self.last_batch = 0
+            self.attempts = 0
+            self.sleep = self.base
+        else:
+            # store last batch num failures
+            self.last_batch = self.num_fail
+
+            # increase number of attempted batches
+            self.attempts += 1
+
+    def _expo(self):
+        return min(self.max_sleep, self.base*pow(2, self.attempts))
+
+    def _backoff(self):
+        if self.jitter:
+            if self.jitter == 'equal':
+                v = self._expo()
+                return v/2 + random.uniform(0, v/2)
+            elif self.jitter == 'full':
+                v = self._expo()
+                return random.uniform(0, v)
+            elif self.jitter == 'decorr':
+                self.sleep = min(self.max_sleep, random.uniform(
+                    self.base, self.sleep*3))
+                return self.sleep
+        else:
+            return self._expo()
+
+    def _average(self):
+        # calculating delay required based on rate averaging
         curr_time = time.time()
         self.cache.append(curr_time)
-        log.debug(f'Cache: {self.cache}- Current Time: {curr_time}')
 
         num_req = len(self.cache)
         first_req = min(self.cache)
@@ -36,18 +86,16 @@ class RateLimit(object):
 
         # remove requests older than 60 seconds old
         while curr_time - first_req > 60:
-            log.debug(
-                f'Removing Time: {first_req} -- {curr_time} -- {first_req - curr_time}')
+
             try:
                 self.cache.remove(first_req)
+                log.debug(
+                    f'{first_req} has been removed from RL cache')
             except:
-                log.info(f'{first_req} has already been removed')
+                log.debug(f'{first_req} has already been removed RL cache')
 
             num_req = len(self.cache)
             first_req = min(self.cache)
-
-        log.debug(
-            f'Num {num_req} - {curr_time} - {last_req - first_req}')
 
         # return 0 if no other requests on cache
         if last_req == first_req:
@@ -60,7 +108,7 @@ class RateLimit(object):
 
             # check if projected rate is too high
             log.debug(f'Projected {proj_rate} -- Desired {self.rate_limit}')
-            if(proj_rate < self.rate_limit):
+            if(proj_rate < self.rate_limit or num_req < 5):
                 return 0
             else:
-                return self._rate_limit(period, num_req)
+                return 60*(num_req)/self.rate_limit - period
