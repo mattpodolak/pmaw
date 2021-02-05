@@ -17,9 +17,9 @@ The following three methods are currently supported:
 - Search Submission Comment IDs: `search_submission_comment_ids`
   - [Details](https://github.com/pushshift/api#get-all-comment-ids-for-a-particular-submission)
 
-## Getting Started
+# Getting Started
 
-### Installation
+## Installation
 
 **PMAW** currently supports _Python 3.5_ or later. To install it via _pip_, run:
 
@@ -66,13 +66,13 @@ We also compare the number of required requests for each of the three **PMAW** r
 
 [Benchmark Notebook](https://github.com/mattpodolak/pmaw/blob/master/examples/benchmark.ipynb)
 
-## Features
+# Features
 
-### Rate Limiting
+## Rate Limiting
 
 Multiple different options are available for rate-limiting your Pushshift API requests, and are defined by two different types, rate-averaging and exponential backoff. If you're unsure on which to use, refer to the [benchmark comparison](#benchmark-comparison).
 
-#### Rate-Averaging
+### Rate-Averaging
 
 **PMAW** by default rate limits using rate-averaging so that the concurrent API requests to the Pushshift server are limited to your provided rate.
 
@@ -80,7 +80,7 @@ Providing a `rate_limit` value is optional, this defaults to `60` requests per m
 
 Additionally, the rate-limiting behaviour can be constrained by the `max_sleep` parameter which allows you to select a maximum period of time to sleep between requests.
 
-#### Exponential Backoff
+### Exponential Backoff
 
 Exponential backoff can be used by setting the `limit_type` to backoff. Four flavours of `backoff` are available based on the usage of jitter: None, full, equal, and decorr - decorrelated.
 
@@ -92,7 +92,7 @@ Introducing an element of randomness called `jitter` allows us to reduce the com
 - `equal` jitter selects the length of sleep for a request by adding half the capped exponential backoff value to a random sample from a normal distribution between 0 and half the capped exponential backoff value.
 - `decorr` - decorrelated jitter is similar to `full` jitter but increases the maximum jitter based on the last random value, selecting the length of sleep by the minimum value between `max_sleep` and a random sample between the `base_backoff` and the last sleep value multiplied by 3.
 
-### Multithreading
+## Multithreading
 
 The number of threads to use during multithreading is set with the `num_workers` parameter. This is optional and defaults to `10`, however, you should provide a value as this may not be appropriate for your machine. Increasing the number of threads you use allows you to make more concurrent requests to Pushshift, however, the returns are diminishing as requests are constrained by the rate-limit. The optimal number of threads for requests is between `10` and `20` depending on the current response time of the Pushshift server.
 
@@ -103,13 +103,13 @@ When selecting the number of `threads` you can follow one of the two methodologi
 
 If you are unsure how many processors you have use: `os.cpu_count()`.
 
-### Unsupported
+## Unsupported
 
 - `asc` sort is unsupported
 - `before` and `after` only support epoch time (float or int)
 - `aggs` are unsupported, as **PMAW** is intended to be used for collecting large numbers of submissions or comments. Use [PSAW](https://github.com/dmarx/psaw) for aggregation requests.
 
-#### Features Requests
+### Features Requests
 
 - For feature requests please open an issue with the `feature request` label, this will allow features to be better prioritized for future releases
 
