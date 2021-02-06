@@ -180,7 +180,7 @@ class PushshiftAPIBase(object):
             if 'created_utc' not in payload['filter']:
                 payload['filter'].append('created_utc')
 
-    def _multithread(self, url_payloads, url_dict={}, limit=None):
+    def _multithread(self, url_payloads, url_dict={}, limit=None, check_total=False):
         # multi-thread requests
         if url_dict:
             results = {}
@@ -219,7 +219,7 @@ class PushshiftAPIBase(object):
                         results.extend(data)
 
                     # handle time slicing logic
-                    if 'before' in payload and 'after' in payload:
+                    if 'before' in payload and 'after' in payload and not check_total:
                         before = payload['before']
                         after = payload['after']
                         log.debug(
@@ -231,28 +231,35 @@ class PushshiftAPIBase(object):
                                 f'Cancelling {len(req_list)} unfinished requests')
                             req_list.clear()
                             break
-                        remaining = self.resp_dict.get(
-                            (after, before), None)
+                        total_results = self.resp_dict.get(
+                            (after, before), 0)
                         log.debug(
-                            f'{remaining} results remaining for this time slice')
+                            f'{total_results} total results for this time slice')
+
+                        # calculate remaining results
+                        remaining = total_results - len(data)
 
                         # number of timeslices is depending on remaining results
-                        if remaining and remaining > self.max_results_per_request*2:
+                        if remaining > self.max_results_per_request:
                             num = 2
+                        elif remaining > 0:
+                            num = 1
+                        else:
+                            num = 0
+
+                        if num > 0:
                             # find minimum `created_utc` to set as the `before` parameter in next timeslices
                             for result in data:
                                 # set before to the last item retrieved from the time slice
                                 r_before = float(result['created_utc'])
                                 if r_before < before:
                                     before = r_before
-                        else:
-                            num = 1
 
-                        # generate timeslices and payloads
-                        ts = self._timeslice(after, before, num)
-                        url_payloads = [(url, self._mapslice(copy.deepcopy(
-                            payload), ts[i], ts[i+1])) for i in range(num)]
-                        req_list.extend(url_payloads)
+                            # generate timeslices and payloads
+                            ts = self._timeslice(after, before, num)
+                            url_payloads = [(url, self._mapslice(copy.deepcopy(
+                                payload), ts[i], ts[i+1])) for i in range(num)]
+                            req_list.extend(url_payloads)
                 except Exception as exc:
                     log.debug(f"Request Failed -- {exc}")
                     self._rate_limit._req_fail()
@@ -289,6 +296,11 @@ class PushshiftAPIBase(object):
             # TODO: manually cancel pending futures
             exc.shutdown(wait=wait)
 
+    def _reset_stats(self):
+        self.num_suc = 0
+        self.num_req = 0
+        self.num_batches = 0
+
     def _search(self,
                 kind,
                 dataset='reddit',
@@ -296,10 +308,8 @@ class PushshiftAPIBase(object):
         self.metadata_ = {}
         self.payload = copy.deepcopy(kwargs)
 
-        # track requests for a search query
-        self.num_suc = 0
-        self.num_req = 0
-        self.num_batches = 0
+        # reset stat tracking
+        self._reset_stats()
 
         # raise error if aggs are requested
         if 'aggs' in self.payload:
@@ -334,10 +344,12 @@ class PushshiftAPIBase(object):
             self._add_nec_args(self.payload)
 
             # check to see how many results are available
-            self._get(url, self.payload)
+            self._multithread([(url, self.payload)], {}, check_total=True)
 
-            total_avail = self.metadata_.get(
-                'total_results', 0) + self.metadata_.get('results_returned', 0)
+            # reset stat tracking
+            self._reset_stats()
+
+            total_avail = self.metadata_.get('total_results', 0)
             print(
                 f'{total_avail} total results available for the selected parameters')
 

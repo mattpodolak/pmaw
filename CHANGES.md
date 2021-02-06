@@ -1,3 +1,8 @@
+## 0.1.1 (2021/02/06)
+
+- Fixed a bug with timeslicing causing duplicate results
+- Fixed a miscalculation error for remaining results for a timeslice
+
 ## 0.1.0 (2021/02/05)
 
 - General code improvements
