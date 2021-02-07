@@ -1,3 +1,7 @@
+## 0.1.2 (2021/02/06)
+
+- Fixed timeslicing creating extra requests
+
 ## 0.1.1 (2021/02/06)
 
 - Fixed a bug with timeslicing causing duplicate results

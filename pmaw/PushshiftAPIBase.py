@@ -240,7 +240,7 @@ class PushshiftAPIBase(object):
                         remaining = total_results - len(data)
 
                         # number of timeslices is depending on remaining results
-                        if remaining > self.max_results_per_request:
+                        if remaining > self.max_results_per_request*2:
                             num = 2
                         elif remaining > 0:
                             num = 1

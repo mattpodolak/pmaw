@@ -52,15 +52,15 @@ Default parameters were used for each **PMAW** rate-limit configuration as well 
 
 ### Results
 
-![01 benchmark](./examples/img/01-comparison.png)
+![01 benchmark](https://raw.githubusercontent.com/mattpodolak/pmaw/master/examples/img/01-comparison.png)
 
 For the first benchmark test we compare the completion times for all possible **PMAW** rate-limiting configurations with **PSAW** for up to 16,000 requested posts. We can see that the three most performant rate-limiting settings for **PMAW** are rate-averaging, and exponential backoff with full or equal jitter.
 
-![02 benchmark](./examples/img/02-comparison.png)
+![02 benchmark](https://raw.githubusercontent.com/mattpodolak/pmaw/master/examples/img/02-comparison.png)
 
 We ran this second benchmark increasing up to 390,000 requested posts, excluding the least performant **PMAW** rate-limiting configurations. From this benchmark, we can see that **PMAW** was on average 1.79x faster than **PSAW** at 390,625 posts retrieved. The total completion time for 390,625 posts with **PSAW** was 2h38m, while the average completion time was 1h28m for **PMAW**.
 
-![02 requests benchmark](./examples/img/02-requests-comparison.png)
+![02 requests benchmark](https://raw.githubusercontent.com/mattpodolak/pmaw/master/examples/img/02-requests-comparison.png)
 
 We also compare the number of required requests for each of the three **PMAW** rate-limit configurations. From this comparison, we can see that for 390,625 requested posts rate-averaging made 33.60% less API requests than exponential backoff.
 
