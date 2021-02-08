@@ -343,22 +343,21 @@ class PushshiftAPIBase(object):
             # add necessary args
             self._add_nec_args(self.payload)
 
-            # check to see how many results are available
-            self._multithread([(url, self.payload)], {}, check_total=True)
-
             # reset stat tracking
             self._reset_stats()
 
-            total_avail = self.metadata_.get('total_results', 0)
-            print(
-                f'{total_avail} total results available for the selected parameters')
-
-            if limit is None or (limit and total_avail < limit):
-                print(f'Setting limit to {total_avail}')
-                limit = total_avail
-
             # return all_results if pushshift repeatedly returns an empty array
-            while limit > 0:
+            while limit is None or limit > 0:
+                # check to see how many results are available
+                self._multithread([(url, self.payload)], {}, check_total=True)
+                
+                total_avail = self.metadata_.get('total_results', 0)
+                print(f'{total_avail} results available in Pushshift')
+
+                if limit is None or (limit and total_avail < limit):
+                    print(f'Setting limit to {total_avail}')
+                    limit = total_avail
+                
                 # create array of payloads
                 url_payloads, url_dict = self._gen_url_payloads(
                     url, sub_c_id=kind == 'submission_comment_ids')
