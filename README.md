@@ -128,7 +128,7 @@ If you are unsure how many processors you have use: `os.cpu_count()`.
 - `limit_type` (str, optional): Type of rate limiting to use, options are 'average' for rate averaging, 'backoff' for exponential backoff. Defaults to 'average'.
 - `jitter` (str, optional): Jitter to use with backoff, options are None, 'full', 'equal', 'decorr'. Defaults to None.
 - `search_window` (int, optional): Size in days for search window for submissions / comments in non-id based search, defaults to 365
-- `checkpoint` (int, optional): Size of interval in requests to print a checkpoint with stats, defaults to 100
+- `checkpoint` (int, optional): Size of interval in batches to print a checkpoint with stats, defaults to 10
 
 ## `search_submissions` and `search_comments`
 
