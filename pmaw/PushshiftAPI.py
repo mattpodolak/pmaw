@@ -38,7 +38,7 @@ class PushshiftAPI(PushshiftAPIBase):
 
             search_window (int, optional) - Size in days for search window for submissions / comments in non-id based search, defaults to 365
 
-            checkpoint (int, optional) - Size of interval in requests to print a checkpoint with stats, defaults to 100
+            checkpoint (int, optional) - Size of interval in batches to print a checkpoint with stats, defaults to 10
         """
         super().__init__(*args, **kwargs)
 

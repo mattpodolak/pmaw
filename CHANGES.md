@@ -1,3 +1,9 @@
+## 0.1.3 (2021/02/08)
+
+- Fixed infinite while loop error
+- Checkpoint by batch
+- Removed erroneous pandas import
+
 ## 0.1.2 (2021/02/06)
 
 - Fixed timeslicing creating extra requests
