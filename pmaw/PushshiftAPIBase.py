@@ -1,5 +1,4 @@
 import time
-import pandas as pd
 import datetime as dt
 import requests
 import json
@@ -20,7 +19,7 @@ class PushshiftAPIBase(object):
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  max_ids_per_request=1000, max_results_per_request=100, batch_size=None,
                  shards_down_behavior='warn', limit_type='average', jitter=None, search_window=365,
-                 checkpoint=100):
+                 checkpoint=10):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -279,7 +278,7 @@ class PushshiftAPIBase(object):
                         shards_down_message + f' {len(req_list)} unfinished requests.')
 
             self.num_batches += 1
-            if (self.num_req % self.checkpoint == 0):
+            if (self.num_batches % self.checkpoint == 0):
                 print(
                     f'Checkpoint:: Success Rate: {(self.num_suc/self.num_req*100):.2f}% - Requests: {self.num_req} - Batches: {self.num_batches}')
 
@@ -343,22 +342,21 @@ class PushshiftAPIBase(object):
             # add necessary args
             self._add_nec_args(self.payload)
 
-            # check to see how many results are available
-            self._multithread([(url, self.payload)], {}, check_total=True)
-
             # reset stat tracking
             self._reset_stats()
 
-            total_avail = self.metadata_.get('total_results', 0)
-            print(
-                f'{total_avail} total results available for the selected parameters')
-
-            if limit is None or (limit and total_avail < limit):
-                print(f'Setting limit to {total_avail}')
-                limit = total_avail
-
             # return all_results if pushshift repeatedly returns an empty array
-            while limit > 0:
+            while limit is None or limit > 0:
+                # check to see how many results are available
+                self._multithread([(url, self.payload)], {}, check_total=True)
+
+                total_avail = self.metadata_.get('total_results', 0)
+                print(f'{total_avail} results available in Pushshift')
+
+                if limit is None or (limit and total_avail < limit):
+                    print(f'Setting limit to {total_avail}')
+                    limit = total_avail
+
                 # create array of payloads
                 url_payloads, url_dict = self._gen_url_payloads(
                     url, sub_c_id=kind == 'submission_comment_ids')
