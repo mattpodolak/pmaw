@@ -25,7 +25,7 @@ setuptools.setup(
     url="https://github.com/mattpodolak/pmaw",
     packages=setuptools.find_packages(),
     license='MIT License',
-    install_requires=['requests', 'pandas'],
+    install_requires=['requests'],
     keywords='reddit api wrapper pushshift multithread data collection',
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -33,6 +33,8 @@ setuptools.setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         "Intended Audience :: Developers",
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",

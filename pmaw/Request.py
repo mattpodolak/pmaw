@@ -1,10 +1,14 @@
 import logging
 import copy
 import datetime as dt
+from collections import deque
+import warnings
 
 from pmaw.Cache import Cache
 from pmaw.utils.slices import timeslice, mapslice
-from collections import deque
+from pmaw.Response import Response
+from threading import Event
+import signal
 
 log = logging.getLogger(__name__)
 
@@ -14,54 +18,60 @@ class Request(object):
         self.kind = kind
         self.max_ids_per_request = min(1000, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
-        self.mem_safe = mem_safe
         self.safe_exit = safe_exit
         self.req_list = deque()
         self.payload = payload
         self.limit = payload.get('limit', None)
-        self.response_cache = False  # track whether any responses are in cache
-        self.num_checkpoint = 0
-        self.results = []
+        self.exit = Event()
 
-        # instantiate cache
-        _tmp = copy.deepcopy(payload)
-        _tmp['kind'] = kind
-        self._cache = Cache(_tmp)
+        if mem_safe or safe_exit:
+            # instantiate cache
+            _tmp = copy.deepcopy(payload)
+            _tmp['kind'] = kind
+            self._cache = Cache(_tmp, safe_exit)
+            if safe_exit:
+                info = self._cache.load_info()
+                if info:
+                    self.req_list.extend(info['req_list'])
+                    self.payload = info['payload']
+                    self.limit = info['limit']
+                    print(
+                        f'Loaded Cache:: Responses: {self._cache.size} - Pending Requests: {len(self.req_list)} - Items Remaining: {self.limit}')
+                    print(f'Payload: {self.payload}')
+        else:
+            self._cache = None
 
-        # TODO: load payload and req_list if self.key is in req_cache and req_list not equal to 0
-        # TODO: set response_cache = True if responses are cached
-        # TODO: set num_checkpoint if responses are cached
-        # TODO: update limit
-        info = self._cache.load_info()
-        if info:
-            self.req_list.extend(info['req_list'])
-            self.payload = info['payload']
-            self.limit = info['limit']
-            print('Loaded previous request data')
-            print(f'Limit {self.limit} - Payload: {self.payload}')
+        # instantiate response
+        self.resp = Response(self._cache)
 
         if 'ids' not in self.payload:
             # add necessary args
             self._add_nec_args(self.payload)
 
-    def save_cache(self):
-        if self.mem_safe:
-            self._cache.cache_responses(self.results)
-            self.response_cache = True
-            self.results.clear()
-            if self.limit <= 0:
-                # save request info to cache
-                print('FInal save')
+    def check_sigs(self):
+        try:
+            getattr(signal, 'SIGHUP')
+            sigs = ('TERM', 'HUP', 'INT')
+        except:
+            sigs = ('TERM', 'INT')
 
-    @property
-    def all_results(self):
-        if self.response_cache:
-            print('Loading from cache')
-        else:
-            return self.results
+        for sig in sigs:
+            signal.signal(getattr(signal, 'SIG'+sig), self._exit)
+
+    def save_cache(self):
+        if self.safe_exit and (self.limit == 0 or self.exit.is_set()):
+            # save request info to cache
+            self._cache.save_info(req_list=self.req_list,
+                                  payload=self.payload, limit=self.limit)
+        if self._cache:
+            self.resp.to_cache()
+
+    def _exit(self, signo, _frame):
+        self.exit.set()
+        self.save_cache()
 
     def save_resp(self, results):
-        self.results.extend(results)
+        self.resp.responses.extend(results)
 
     def _add_nec_args(self, payload):
         """Adds arguments to the payload as necessary."""
@@ -89,7 +99,9 @@ class Request(object):
     def gen_slices(self, url, payload, after, before, num):
         # create time slices
         ts = timeslice(after, before, num)
-        return [(url, mapslice(copy.deepcopy(payload), ts[i], ts[i+1])) for i in range(num)]
+        url_payloads = [(url, mapslice(copy.deepcopy(payload),
+                                       ts[i], ts[i+1])) for i in range(num)]
+        self.req_list.extend(url_payloads)
 
     def gen_url_payloads(self, url, batch_size, search_window):
         """Creates a list of url payload tuples"""
@@ -104,16 +116,19 @@ class Request(object):
                 self._id_list(self.payload)
 
                 all_ids = self.payload['ids']
+                if len(all_ids) == 0 and self.limit > 0:
+                    warnings.warn(
+                        f'{self.limit} items were not found in Pushshift')
+                self.limit = len(all_ids)
 
                 # remove ids from payload to prevent , -> %2C and increasing query length
                 # beyond the max length of 8190
-                payload = copy.deepcopy(self.payload)
-                payload.pop('ids', None)
+                self.payload['ids'] = []
 
                 # if searching for submission comment ids
                 if self.kind == "submission_comment_ids":
                     urls = [url+sub_id for sub_id in all_ids]
-                    url_payloads = [(url, payload) for url in urls]
+                    url_payloads = [(url, self.payload) for url in urls]
                 else:
                     # split ids into arrays of size max_ids_per_request
                     ids_split = []
@@ -125,8 +140,11 @@ class Request(object):
                     log.debug(f'Created {len(ids_split)} id slices')
 
                     # create url payload tuples
-                    url_payloads = [(url + '?ids=' + id_str, payload)
+                    url_payloads = [(url + '?ids=' + id_str, self.payload)
                                     for id_str in ids_split]
+                # add payloads to req_list
+                self.req_list.extend(url_payloads)
+
             else:
                 if 'after' not in self.payload:
                     search_window = dt.timedelta(days=search_window)
@@ -138,20 +156,14 @@ class Request(object):
                     # set before to after for future time slices
                     self.payload['before'] = after
 
-                    # generate payloads
-                    url_payloads = self.gen_slices(
-                        url, self.payload, after, before, num)
-
                 else:
                     before = self.payload['before']
                     after = self.payload['after']
                     num = batch_size
 
-                    # generate payloads
-                    url_payloads = self.gen_slices(
-                        url, self.payload, after, before, num)
-
-            self.req_list.extend(url_payloads)
+                # generate payloads
+                self.gen_slices(
+                    url, self.payload, after, before, num)
 
     def _id_list(self, payload):
         if not isinstance(payload['ids'], list):
@@ -162,4 +174,4 @@ class Request(object):
 
     def trim(self):
         log.debug(f'Trimming {self.limit*-1} requests')
-        self.results = self.results[:self.limit]
+        self.resp.responses = self.resp.responses[:self.limit]

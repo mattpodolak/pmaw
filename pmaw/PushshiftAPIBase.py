@@ -27,7 +27,6 @@ class PushshiftAPIBase(object):
         self.metadata_ = {}
         self.resp_dict = {}
         self.checkpoint = checkpoint
-        self.all_results = []
         self.file_checkpoint = file_checkpoint
 
         if batch_size:
@@ -38,9 +37,6 @@ class PushshiftAPIBase(object):
         # instantiate rate limiter
         self._rate_limit = RateLimit(
             rate_limit, base_backoff, limit_type, max_sleep, jitter)
-
-    def __exit__(self, *exc):
-        print('Cleaning up')
 
     @property
     def base_url(self):
@@ -87,22 +83,25 @@ class PushshiftAPIBase(object):
             return
         return shards['successful'] != shards['total']
 
-    def _multithread(self, req_list, check_total=False):
+    def _multithread(self, check_total=False):
         executor = ThreadPoolExecutor(max_workers=self.num_workers)
 
-        while len(req_list) > 0:
+        while len(self.req.req_list) > 0 and not self.req.exit.is_set():
             # reset resp_dict which tracks remaining responses for timeslices
             self.resp_dict = {}
 
             # set number of futures created to batch size
             reqs = []
-            for i in range(min(len(req_list), self.batch_size)):
-                reqs.append(req_list.popleft())
+            if check_total:
+                reqs.append(self.req.req_list.popleft())
+            else:
+                for i in range(min(len(self.req.req_list), self.batch_size)):
+                    reqs.append(self.req.req_list.popleft())
 
             futures = {executor.submit(
                 self._get, url_pay[0], url_pay[1]): url_pay for url_pay in reqs}
 
-            self._futures_handler(futures, req_list, check_total)
+            self._futures_handler(futures, check_total)
 
             # reset attempts if no failures
             self._rate_limit._check_fail()
@@ -115,25 +114,26 @@ class PushshiftAPIBase(object):
                 if self.shards_down_behavior == 'stop':
                     self._shutdown(executor)
                     raise RuntimeError(
-                        shards_down_message + f' {len(req_list)} unfinished requests.')
+                        shards_down_message + f' {len(self.req.req_list)} unfinished requests.')
+            if self.num_batches % self.file_checkpoint == 0:
+                # cache current results
+                executor.submit(self.req.save_cache())
             if not check_total:
                 self.num_batches += 1
                 self._print_stats('Checkpoint')
-            if self.num_batches % self.file_checkpoint == 0:
-                # cache current results
-                self.req.save_cache()
-
+            else:
+                break
         if not check_total:
             self._print_stats('Total')
         self._shutdown(executor)
 
-    def _futures_handler(self, futures, req_list, check_total):
+    def _futures_handler(self, futures, check_total):
         for future in as_completed(futures):
             url_pay = futures[future]
-            self.num_req += 1
+            self.num_req += int(not check_total)
             try:
                 data = future.result()
-                self.num_suc += 1
+                self.num_suc += int(not check_total)
                 url = url_pay[0]
                 payload = url_pay[1]
                 if not check_total:
@@ -143,8 +143,8 @@ class PushshiftAPIBase(object):
                     log.info(f'Remaining limit {self.req.limit}')
                     if self.req.limit <= 0:
                         log.debug(
-                            f'Cancelling {len(req_list)} unfinished requests')
-                        req_list.clear()
+                            f'Cancelling {len(self.req.req_list)} unfinished requests')
+                        self.req.req_list.clear()
                         break
 
                     # handle time slicing logic
@@ -172,17 +172,17 @@ class PushshiftAPIBase(object):
                             # find minimum `created_utc` to set as the `before` parameter in next timeslices
                             for result in data:
                                 # set before to the last item retrieved from the time slice
-                                r_before = float(result['created_utc'])
+                                r_before = int(result['created_utc'])
                                 if r_before < before:
                                     before = r_before
 
                             # generate payloads
-                            req_list.extend(self.req.gen_slices(
-                                url, payload, after, before, num))
+                            self.req.gen_slices(
+                                url, payload, after, before, num)
             except Exception as exc:
                 log.debug(f"Request Failed -- {exc}")
                 self._rate_limit._req_fail()
-                req_list.appendleft(url_pay)
+                self.req.req_list.appendleft(url_pay)
 
     def _shutdown(self, exc, wait=False, cancel_futures=True):
         # shutdown executor
@@ -194,13 +194,15 @@ class PushshiftAPIBase(object):
 
     def _print_stats(self, prefix):
         rate = self.num_suc/self.num_req*100
-        remaining = self.resp.limit
+        remaining = self.req.limit
         if (self.num_batches % self.checkpoint == 0) and prefix == 'Checkpoint':
             print(
-                f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Remaining: {remaining}')
+                f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
         elif prefix == 'Total':
+            if remaining < 0:
+                remaining = 0  # don't print a neg number
             print(
-                f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Remaining: {remaining}')
+                f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
 
     def _reset(self):
         self.num_suc = 0
@@ -236,31 +238,33 @@ class PushshiftAPIBase(object):
 
         url = self.base_url.format(endpoint=endpoint)
 
-        while self.req.limit is None or self.req.limit > 0:
+        while (self.req.limit is None or self.req.limit > 0) and not self.req.exit.is_set():
             # generate payloads
             self.req.gen_url_payloads(
                 url, self.batch_size, search_window)
-
             # set/update limit
-            if 'ids' in self.req.payload:
-                self.req.limit = len(self.req.payload.get('ids', []))
-            else:
+            if 'ids' not in self.req.payload:
                 # check to see how many results are remaining
-                self._multithread([(url, self.req.payload)], check_total=True)
+                self.req.req_list.appendleft((url, self.req.payload))
+                self._multithread(check_total=True)
                 total_avail = self.metadata_.get('total_results', 0)
 
                 if self.req.limit is None or (self.req.limit and total_avail < self.req.limit):
                     print(f'{total_avail} results available in Pushshift')
                     self.req.limit = total_avail
 
-            self._multithread(self.req.req_list)
+            # check for exit signals
+            self.req.check_sigs()
+
+            if self.req.limit > 0 and len(self.req.req_list) > 0:
+                self._multithread()
 
         if self.req.limit < 0:
             # trim results before returning
             self.req.trim()
             self.req.save_cache()
-            return self.req
+            return self.req.resp
 
         else:
             self.req.save_cache()
-            return self.req
+            return self.req.resp
