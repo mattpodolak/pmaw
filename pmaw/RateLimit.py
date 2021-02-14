@@ -6,16 +6,7 @@ log = logging.getLogger(__name__)
 
 
 class RateLimit(object):
-    """
-    We define a RateLimit object to manage the rate limit for concurrent requests
-
-    Input:
-        rate_limit (int, optional) - Maximum number of requests per minute, defaults to 60 requests per minute.
-        base_backoff (float, optional) - Base delay in seconds for backoff, defaults to 0.5s.
-        limit_type (str, optional) - Type of rate limiting to use, default value is 'average' for rate averaging.
-        max_sleep (int, optional) - Maximum rate-limit sleep time (in seconds) between requests, defaults to 60s.
-        jitter (str, optional) - Jitter to use with backoff, defaults to None, options are None, full, equal, decorr
-    """
+    """RateLimit: Implements different rate-limiting strategies for concurrent requests"""
 
     def __init__(self, rate_limit=60, base_backoff=0.5, limit_type='average', max_sleep=60, jitter=None):
         self.rate_limit = rate_limit

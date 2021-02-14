@@ -4,11 +4,14 @@ import json
 import hashlib
 import logging
 import re
+import warnings
 
 log = logging.getLogger(__name__)
 
 
 class Cache(object):
+    """Cache: Handle storing and loading request info and responses in the cache"""
+
     def __init__(self, payload, safe_exit):
         # generating key
         key_str = json.dumps(payload, sort_keys=True).encode("utf-8")
@@ -47,7 +50,7 @@ class Cache(object):
             with open(f'./{self.folder}/{self.key}_info.pickle', 'rb') as handle:
                 return pickle.load(handle)
         except:
-            print('No previous requests to load')
+            log.info('No previous requests to load')
 
     def load_resp(self, cache_num):
         filename = self.response_cache[cache_num]
@@ -55,7 +58,7 @@ class Cache(object):
             with open(f'./{self.folder}/{filename}', 'rb') as handle:
                 return pickle.load(handle)
         except Exception as exc:
-            print(f'Failed to load responses from {filename} - {exc}')
+            warnings.warn(f'Failed to load responses from {filename} - {exc}')
 
     def save_info(self, **kwargs):
         filename = f'./{self.folder}/{self.key}_info.pickle'

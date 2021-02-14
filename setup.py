@@ -26,7 +26,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     license='MIT License',
     install_requires=['requests'],
-    keywords='reddit api wrapper pushshift multithread data collection',
+    keywords='reddit api wrapper pushshift multithread data collection cache',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3 :: Only",

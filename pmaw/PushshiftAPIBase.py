@@ -1,5 +1,4 @@
 import time
-import pandas as pd
 import datetime as dt
 import requests
 import json
@@ -20,7 +19,7 @@ class PushshiftAPIBase(object):
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
-                 checkpoint=10, file_checkpoint=100):
+                 checkpoint=10, file_checkpoint=20):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -170,11 +169,7 @@ class PushshiftAPIBase(object):
 
                         if num > 0:
                             # find minimum `created_utc` to set as the `before` parameter in next timeslices
-                            for result in data:
-                                # set before to the last item retrieved from the time slice
-                                r_before = int(result['created_utc'])
-                                if r_before < before:
-                                    before = r_before
+                            before = data[-1]['created_utc']
 
                             # generate payloads
                             self.req.gen_slices(
@@ -239,9 +234,6 @@ class PushshiftAPIBase(object):
         url = self.base_url.format(endpoint=endpoint)
 
         while (self.req.limit is None or self.req.limit > 0) and not self.req.exit.is_set():
-            # generate payloads
-            self.req.gen_url_payloads(
-                url, self.batch_size, search_window)
             # set/update limit
             if 'ids' not in self.req.payload:
                 # check to see how many results are remaining
@@ -253,18 +245,15 @@ class PushshiftAPIBase(object):
                     print(f'{total_avail} results available in Pushshift')
                     self.req.limit = total_avail
 
+            # generate payloads
+            self.req.gen_url_payloads(
+                url, self.batch_size, search_window)
+
             # check for exit signals
             self.req.check_sigs()
 
             if self.req.limit > 0 and len(self.req.req_list) > 0:
                 self._multithread()
 
-        if self.req.limit < 0:
-            # trim results before returning
-            self.req.trim()
-            self.req.save_cache()
-            return self.req.resp
-
-        else:
-            self.req.save_cache()
-            return self.req.resp
+        self.req.save_cache()
+        return self.req.resp

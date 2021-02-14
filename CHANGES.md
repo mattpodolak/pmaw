@@ -1,3 +1,17 @@
+## 1.0.0 (2021/02/14)
+
+- `search` methods now return a `Response` generator object
+- memory safety can now be enabled with `mem_safe` to cache responses during data retrieval and reduce the amount of memory used
+- safe exiting can now be enabled with `safe_exit` to safely exit when handle an interrupt signal is received during data retrieval
+- load unfinished requests and saved responses from `cache` when safe exiting is enabled
+- request details are now handled inside a `Request` object
+
+## 0.1.3 (2021/02/08)
+
+- Fixed infinite while loop error
+- Checkpoint by batch
+- Removed erroneous pandas import
+
 ## 0.1.2 (2021/02/06)
 
 - Fixed timeslicing creating extra requests

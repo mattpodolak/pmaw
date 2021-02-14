@@ -5,6 +5,8 @@ log = logging.getLogger(__name__)
 
 
 class Response(Generator):
+    """Response: A generator which contains the responses from the request, loads from cache if needed."""
+
     def __init__(self, cache=None):
         self.responses = []
         self._cache = cache

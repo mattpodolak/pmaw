@@ -14,15 +14,22 @@ log = logging.getLogger(__name__)
 
 
 class Request(object):
+    """Request: Handles request information, response saving, and cache usage."""
+
     def __init__(self, payload, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit):
         self.kind = kind
         self.max_ids_per_request = min(1000, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
         self.safe_exit = safe_exit
+        self.mem_safe = mem_safe
         self.req_list = deque()
         self.payload = payload
         self.limit = payload.get('limit', None)
         self.exit = Event()
+
+        if 'ids' not in self.payload:
+            # add necessary args
+            self._add_nec_args(self.payload)
 
         if mem_safe or safe_exit:
             # instantiate cache
@@ -37,16 +44,11 @@ class Request(object):
                     self.limit = info['limit']
                     print(
                         f'Loaded Cache:: Responses: {self._cache.size} - Pending Requests: {len(self.req_list)} - Items Remaining: {self.limit}')
-                    print(f'Payload: {self.payload}')
         else:
             self._cache = None
 
         # instantiate response
         self.resp = Response(self._cache)
-
-        if 'ids' not in self.payload:
-            # add necessary args
-            self._add_nec_args(self.payload)
 
     def check_sigs(self):
         try:
@@ -59,16 +61,19 @@ class Request(object):
             signal.signal(getattr(signal, 'SIG'+sig), self._exit)
 
     def save_cache(self):
+        # trim extra responses
+        self.trim()
         if self.safe_exit and (self.limit == 0 or self.exit.is_set()):
             # save request info to cache
             self._cache.save_info(req_list=self.req_list,
                                   payload=self.payload, limit=self.limit)
-        if self._cache:
+            # save responses to cache
+            self.resp.to_cache()
+        elif self.mem_safe:
             self.resp.to_cache()
 
     def _exit(self, signo, _frame):
         self.exit.set()
-        self.save_cache()
 
     def save_resp(self, results):
         self.resp.responses.extend(results)
@@ -173,5 +178,6 @@ class Request(object):
                 payload['ids'] = list(payload['ids'])
 
     def trim(self):
-        log.debug(f'Trimming {self.limit*-1} requests')
-        self.resp.responses = self.resp.responses[:self.limit]
+        if self.limit < 0:
+            log.debug(f'Trimming {self.limit*-1} requests')
+            self.resp.responses = self.resp.responses[:self.limit]
