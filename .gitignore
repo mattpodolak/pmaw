@@ -1,5 +1,7 @@
 pmaw.egg-info
 /dist
 /build
+/pmaw/utils/__pycache__
 /pmaw/__pycache__
 /examples/.ipynb_checkpoints
+/examples/cache

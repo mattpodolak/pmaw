@@ -3,12 +3,13 @@ import datetime as dt
 import requests
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from collections import deque
 import copy
 import logging
 import warnings
 
 from pmaw.RateLimit import RateLimit
+from pmaw.Request import Request
+from pmaw.utils.slices import timeslice, mapslice
 
 log = logging.getLogger(__name__)
 
@@ -17,18 +18,15 @@ class PushshiftAPIBase(object):
     _base_url = 'https://{domain}.pushshift.io/{{endpoint}}'
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
-                 max_ids_per_request=1000, max_results_per_request=100, batch_size=None,
-                 shards_down_behavior='warn', limit_type='average', jitter=None, search_window=365,
-                 checkpoint=10):
+                 batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
+                 checkpoint=10, file_checkpoint=20):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
-        self.max_ids_per_request = min(1000, max_ids_per_request)
-        self.max_results_per_request = min(100, max_results_per_request)
         self.metadata_ = {}
-        self.search_window = search_window
         self.resp_dict = {}
         self.checkpoint = checkpoint
+        self.file_checkpoint = file_checkpoint
 
         if batch_size:
             self.batch_size = batch_size
@@ -84,185 +82,25 @@ class PushshiftAPIBase(object):
             return
         return shards['successful'] != shards['total']
 
-    def _id_list(self, payload):
-        if not isinstance(payload['ids'], list):
-            if isinstance(payload['ids'], str):
-                payload['ids'] = [payload['ids']]
-            else:
-                payload['ids'] = list(payload['ids'])
-
-    def _gen_url_payloads(self, url, sub_c_id=False):
-        """Creates a list of url payload tuples"""
-        url_payloads = []
-        url_dict = {}
-        # paging for ids
-        if 'ids' in self.payload:
-
-            # convert ids to list
-            self._id_list(self.payload)
-
-            all_ids = self.payload['ids']
-
-            # remove ids from payload to prevent , -> %2C and increasing query length
-            # beyond the max length of 8190
-            self.payload.pop('ids', None)
-
-            # if searching for submission comment ids
-            if sub_c_id:
-                url_dict = {url+sub_id: sub_id for sub_id in all_ids}
-                url_payloads = [(url, self.payload) for url in url_dict.keys()]
-            else:
-                # split ids into arrays of size max_ids_per_request
-                ids_split = []
-                max_len = self.max_ids_per_request
-                while len(all_ids) > 0:
-                    ids_split.append(",".join(all_ids[:max_len]))
-                    all_ids = all_ids[max_len:]
-
-                log.debug(f'Created {len(ids_split)} id slices')
-
-                # create url payload tuples
-                url_payloads = [(url + '?ids=' + id_str, self.payload)
-                                for id_str in ids_split]
-        else:
-            if 'after' not in self.payload:
-                search_window = dt.timedelta(days=self.search_window)
-                num = self.num_workers
-                before = self.payload['before']
-                after = int((dt.datetime.fromtimestamp(
-                    before) - search_window).timestamp())
-
-                # set before to after for future time slices
-                self.payload['before'] = after
-
-                # create time slices
-                ts = self._timeslice(after, before, num)
-                url_payloads = [(url, self._mapslice(copy.deepcopy(
-                    self.payload), ts[i], ts[i+1])) for i in range(num)]
-
-            else:
-                before = self.payload['before']
-                after = self.payload['after']
-                num = self.batch_size
-
-                # create time slices
-                ts = self._timeslice(after, before, num)
-                url_payloads = [(url, self._mapslice(copy.deepcopy(
-                    self.payload), ts[i], ts[i+1])) for i in range(num)]
-
-        return url_payloads, url_dict
-
-    def _timeslice(self, after, before, num):
-        log.debug(
-            f'Generating {num} slices between {after} and {before}')
-        return [int((before-after)*i/num) + after for i in range(num+1)]
-
-    def _mapslice(self, payload, after, before):
-        payload['before'] = before
-        payload['after'] = after
-        return payload
-
-    def _add_nec_args(self, payload):
-        """Adds arguments to the payload as necessary."""
-        payload['limit'] = self.max_results_per_request
-        if 'metadata' not in payload:
-            payload['metadata'] = 'true'
-        if 'before' not in payload:
-            payload['before'] = int(dt.datetime.now().timestamp())
-        if 'filter' in payload:
-            if not isinstance(payload['filter'], list):
-                if isinstance(payload['filter'], str):
-                    payload['filter'] = [payload['filter']]
-                else:
-                    payload['filter'] = list(payload['filter'])
-            # make sure that the created_utc field is returned
-            if 'created_utc' not in payload['filter']:
-                payload['filter'].append('created_utc')
-
-    def _multithread(self, url_payloads, url_dict={}, limit=None, check_total=False):
-        # multi-thread requests
-        if url_dict:
-            results = {}
-        else:
-            results = []
+    def _multithread(self, check_total=False):
         executor = ThreadPoolExecutor(max_workers=self.num_workers)
-        # initialize task list deque
-        req_list = deque()
-        req_list.extend(url_payloads)
 
-        while len(req_list) > 0:
+        while len(self.req.req_list) > 0 and not self.req.exit.is_set():
             # reset resp_dict which tracks remaining responses for timeslices
             self.resp_dict = {}
 
-            # batch number of futures created to batch size
+            # set number of futures created to batch size
             reqs = []
-            for i in range(min(len(req_list), self.batch_size)):
-                reqs.append(req_list.popleft())
+            if check_total:
+                reqs.append(self.req.req_list.popleft())
+            else:
+                for i in range(min(len(self.req.req_list), self.batch_size)):
+                    reqs.append(self.req.req_list.popleft())
 
             futures = {executor.submit(
                 self._get, url_pay[0], url_pay[1]): url_pay for url_pay in reqs}
 
-            for future in as_completed(futures):
-                url_pay = futures[future]
-                self.num_req += 1
-                try:
-                    data = future.result()
-                    self.num_suc += 1
-                    url = url_pay[0]
-                    payload = url_pay[1]
-
-                    if url_dict:
-                        _id = url_dict[url]
-                        results[_id] = data
-                    else:
-                        results.extend(data)
-
-                    # handle time slicing logic
-                    if 'before' in payload and 'after' in payload and not check_total:
-                        before = payload['before']
-                        after = payload['after']
-                        log.debug(
-                            f"Time slice from {after} - {before} returned {len(data)} results")
-                        limit -= len(data)
-                        log.info(f'Remaining limit {limit}')
-                        if limit <= 0:
-                            log.debug(
-                                f'Cancelling {len(req_list)} unfinished requests')
-                            req_list.clear()
-                            break
-                        total_results = self.resp_dict.get(
-                            (after, before), 0)
-                        log.debug(
-                            f'{total_results} total results for this time slice')
-
-                        # calculate remaining results
-                        remaining = total_results - len(data)
-
-                        # number of timeslices is depending on remaining results
-                        if remaining > self.max_results_per_request*2:
-                            num = 2
-                        elif remaining > 0:
-                            num = 1
-                        else:
-                            num = 0
-
-                        if num > 0:
-                            # find minimum `created_utc` to set as the `before` parameter in next timeslices
-                            for result in data:
-                                # set before to the last item retrieved from the time slice
-                                r_before = float(result['created_utc'])
-                                if r_before < before:
-                                    before = r_before
-
-                            # generate timeslices and payloads
-                            ts = self._timeslice(after, before, num)
-                            url_payloads = [(url, self._mapslice(copy.deepcopy(
-                                payload), ts[i], ts[i+1])) for i in range(num)]
-                            req_list.extend(url_payloads)
-                except Exception as exc:
-                    log.debug(f"Request Failed -- {exc}")
-                    self._rate_limit._req_fail()
-                    req_list.appendleft(url_pay)
+            self._futures_handler(futures, check_total)
 
             # reset attempts if no failures
             self._rate_limit._check_fail()
@@ -275,17 +113,71 @@ class PushshiftAPIBase(object):
                 if self.shards_down_behavior == 'stop':
                     self._shutdown(executor)
                     raise RuntimeError(
-                        shards_down_message + f' {len(req_list)} unfinished requests.')
-
-            self.num_batches += 1
-            if (self.num_batches % self.checkpoint == 0):
-                print(
-                    f'Checkpoint:: Success Rate: {(self.num_suc/self.num_req*100):.2f}% - Requests: {self.num_req} - Batches: {self.num_batches}')
-
-        print(
-            f'Total:: Success Rate: {(self.num_suc/self.num_req*100):.2f}% - Requests: {self.num_req} - Batches: {self.num_batches}')
+                        shards_down_message + f' {len(self.req.req_list)} unfinished requests.')
+            if self.num_batches % self.file_checkpoint == 0:
+                # cache current results
+                executor.submit(self.req.save_cache())
+            if not check_total:
+                self.num_batches += 1
+                self._print_stats('Checkpoint')
+            else:
+                break
+        if not check_total:
+            self._print_stats('Total')
         self._shutdown(executor)
-        return results
+
+    def _futures_handler(self, futures, check_total):
+        for future in as_completed(futures):
+            url_pay = futures[future]
+            self.num_req += int(not check_total)
+            try:
+                data = future.result()
+                self.num_suc += int(not check_total)
+                url = url_pay[0]
+                payload = url_pay[1]
+                if not check_total:
+                    self.req.save_resp(data)
+                    self.req.limit -= len(data)
+
+                    log.info(f'Remaining limit {self.req.limit}')
+                    if self.req.limit <= 0:
+                        log.debug(
+                            f'Cancelling {len(self.req.req_list)} unfinished requests')
+                        self.req.req_list.clear()
+                        break
+
+                    # handle time slicing logic
+                    if 'before' in payload and 'after' in payload:
+                        before = payload['before']
+                        after = payload['after']
+                        log.debug(
+                            f"Time slice from {after} - {before} returned {len(data)} results")
+                        total_results = self.resp_dict.get(
+                            (after, before), 0)
+                        log.debug(
+                            f'{total_results} total results for this time slice')
+                        # calculate remaining results
+                        remaining = total_results - len(data)
+
+                        # number of timeslices is depending on remaining results
+                        if remaining > self.req.max_results_per_request*2:
+                            num = 2
+                        elif remaining > 0:
+                            num = 1
+                        else:
+                            num = 0
+
+                        if num > 0:
+                            # find minimum `created_utc` to set as the `before` parameter in next timeslices
+                            before = data[-1]['created_utc']
+
+                            # generate payloads
+                            self.req.gen_slices(
+                                url, payload, after, before, num)
+            except Exception as exc:
+                log.debug(f"Request Failed -- {exc}")
+                self._rate_limit._req_fail()
+                self.req.req_list.appendleft(url_pay)
 
     def _shutdown(self, exc, wait=False, cancel_futures=True):
         # shutdown executor
@@ -295,31 +187,44 @@ class PushshiftAPIBase(object):
             # TODO: manually cancel pending futures
             exc.shutdown(wait=wait)
 
-    def _reset_stats(self):
+    def _print_stats(self, prefix):
+        rate = self.num_suc/self.num_req*100
+        remaining = self.req.limit
+        if (self.num_batches % self.checkpoint == 0) and prefix == 'Checkpoint':
+            print(
+                f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
+        elif prefix == 'Total':
+            if remaining < 0:
+                remaining = 0  # don't print a neg number
+            print(
+                f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
+
+    def _reset(self):
         self.num_suc = 0
         self.num_req = 0
         self.num_batches = 0
 
     def _search(self,
                 kind,
+                max_ids_per_request=1000,
+                max_results_per_request=100,
+                mem_safe=False,
+                search_window=365,
                 dataset='reddit',
+                safe_exit=False,
                 **kwargs):
-        self.metadata_ = {}
-        self.payload = copy.deepcopy(kwargs)
-
-        # reset stat tracking
-        self._reset_stats()
 
         # raise error if aggs are requested
-        if 'aggs' in self.payload:
+        if 'aggs' in kwargs:
             err_msg = "Aggregations support for {} has not yet been implemented, please use the PSAW package for your request"
-            raise NotImplementedError(err_msg.format(self.payload['aggs']))
+            raise NotImplementedError(err_msg.format(kwargs['aggs']))
 
-        if 'sort' not in self.payload:
-            self.payload['sort'] = 'desc'
-        elif self.payload.get('sort') != 'desc':
-            err_msg = "Support for non-default sort has not been implemented as it may cause unexpected results"
-            raise NotImplementedError(err_msg)
+        self.metadata_ = {}
+        self.req = Request(copy.deepcopy(kwargs), kind,
+                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit)
+
+        # reset stat tracking
+        self._reset()
 
         if kind == 'submission_comment_ids':
             endpoint = f'{dataset}/submission/comment_ids/'
@@ -328,44 +233,27 @@ class PushshiftAPIBase(object):
 
         url = self.base_url.format(endpoint=endpoint)
 
-        if 'ids' in self.payload:
-            # create array of payloads
-            url_payloads, url_dict = self._gen_url_payloads(
-                url, sub_c_id=kind == 'submission_comment_ids')
-
-            return self._multithread(url_payloads, url_dict)
-        else:
-            limit = self.payload.get('limit', None)
-
-            all_results = []
-
-            # add necessary args
-            self._add_nec_args(self.payload)
-
-            # reset stat tracking
-            self._reset_stats()
-
-            # return all_results if pushshift repeatedly returns an empty array
-            while limit is None or limit > 0:
-                # check to see how many results are available
-                self._multithread([(url, self.payload)], {}, check_total=True)
-
+        while (self.req.limit is None or self.req.limit > 0) and not self.req.exit.is_set():
+            # set/update limit
+            if 'ids' not in self.req.payload:
+                # check to see how many results are remaining
+                self.req.req_list.appendleft((url, self.req.payload))
+                self._multithread(check_total=True)
                 total_avail = self.metadata_.get('total_results', 0)
-                print(f'{total_avail} results available in Pushshift')
 
-                if limit is None or (limit and total_avail < limit):
-                    print(f'Setting limit to {total_avail}')
-                    limit = total_avail
+                if self.req.limit is None or (self.req.limit and total_avail < self.req.limit):
+                    print(f'{total_avail} results available in Pushshift')
+                    self.req.limit = total_avail
 
-                # create array of payloads
-                url_payloads, url_dict = self._gen_url_payloads(
-                    url, sub_c_id=kind == 'submission_comment_ids')
-                results = self._multithread(url_payloads, url_dict, limit)
-                all_results.extend(results)
-                limit -= len(results)
+            # generate payloads
+            self.req.gen_url_payloads(
+                url, self.batch_size, search_window)
 
-            if limit < 0:
-                log.debug(f'Trimming {limit*-1} requests')
-                return all_results[:limit]
-            else:
-                return all_results
+            # check for exit signals
+            self.req.check_sigs()
+
+            if self.req.limit > 0 and len(self.req.req_list) > 0:
+                self._multithread()
+
+        self.req.save_cache()
+        return self.req.resp
