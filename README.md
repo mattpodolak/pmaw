@@ -274,6 +274,8 @@ A `before` value is required to load previous responses / requests when using no
 
 [Benchmark Notebook](https://github.com/mattpodolak/pmaw/blob/master/examples/benchmark.ipynb)
 
+## PMAW and PSAW Comparison
+
 ### Completion Time
 
 A benchmark comparison was performed to determined the completion time for different size requests, ranging from 1 to 390,000 requested posts. This will allow us to determine which Pushshift wrappers and rate-limiting methods are best for different request sizes.
@@ -293,6 +295,22 @@ We ran this second benchmark increasing up to 390,000 requested posts, excluding
 ![02 requests benchmark](https://raw.githubusercontent.com/mattpodolak/pmaw/master/examples/img/02-requests-comparison.png)
 
 We also compare the number of required requests for each of the three **PMAW** rate-limit configurations. From this comparison, we can see that for 390,625 requested posts rate-averaging made 33.60% less API requests than exponential backoff.
+
+## Memory Safety (Cache)
+
+A benchmark test was performed for the memory safety feature (`mem_safe=True`) to see the impact of caching responses has on the completion time, memory use, and max memory use while running requests for different limits.
+
+![03 cache time benchmark](https://raw.githubusercontent.com/mattpodolak/pmaw/master/examples/img/03-cache-time-comparison.png)
+
+We can see that when memory safety was enabled, the completion time for 390,000 posts was 17.11% slower than when this feature was disabled and responses were not being cached, finishing in 1h30m instead of 1h17m.
+
+![03 cache memory benchmark](https://raw.githubusercontent.com/mattpodolak/pmaw/master/examples/img/03-cache-memory-comparison.png)
+
+When memory safety is enabled responses start being cached after 20 checkpoints (default `file_checkpoint=20`), equivalent to approximately 20,000 responses, causing the memory use to level out around 170MB of memory. Enabling memory safety allows us to use 90.97% less memory is used than when it is disabled, with the non-cached responses using 1.9GB of memory when 390,000 posts were retrieved. It's clear to see that we could easily trigger an out of memory error if we were to retrieve millions of submissions with memory safety disabled.
+
+![03 cache max memory benchmark](https://raw.githubusercontent.com/mattpodolak/pmaw/master/examples/img/03-cache-max-memory-comparison.png)
+
+We compare the maximum memory use during data retrieval as well. Once again, around the 20,000 response mark, the two methods diverge as responses begin to be added to the cache. For 390,000 posts, the maximum memory use when memory safety was enabled was 58.2% less than when it was disabled (797MB vs 1.9GB).
 
 # Deprecated Examples
 
