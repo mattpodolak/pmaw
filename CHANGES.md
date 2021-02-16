@@ -1,8 +1,12 @@
+## 1.0.1 (2021/02/16)
+
+- limit error in `trim` hot fix
+
 ## 1.0.0 (2021/02/14)
 
 - `search` methods now return a `Response` generator object
 - memory safety can now be enabled with `mem_safe` to cache responses during data retrieval and reduce the amount of memory used
-- safe exiting can now be enabled with `safe_exit` to safely exit when handle an interrupt signal is received during data retrieval
+- safe exiting can now be enabled with `safe_exit` to safely exit when an interrupt signal is received during data retrieval
 - load unfinished requests and saved responses from `cache` when safe exiting is enabled
 - request details are now handled inside a `Request` object
 
