@@ -1,3 +1,7 @@
+## 1.0.2 (2021/02/11)
+
+- fixed comments returning 25 by default
+
 ## 1.0.1 (2021/02/16)
 
 - limit error in `trim` hot fix
