@@ -81,8 +81,7 @@ class Request(object):
     def _add_nec_args(self, payload):
         """Adds arguments to the payload as necessary."""
 
-        if 'ids' not in payload:
-            payload['size'] = self.max_results_per_request
+        payload['size'] = self.max_results_per_request
 
         if 'sort' not in payload:
             payload['sort'] = 'desc'
