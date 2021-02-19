@@ -1,4 +1,9 @@
-## 1.0.2 (2021/02/11)
+## 1.0.3 (2021/02/19)
+
+- fixed early cache bug
+- fixed limit being retrieved from next search window when resuming from safe exit
+
+## 1.0.2 (2021/02/16)
 
 - fixed comments returning 25 by default
 

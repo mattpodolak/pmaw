@@ -114,11 +114,11 @@ class PushshiftAPIBase(object):
                     self._shutdown(executor)
                     raise RuntimeError(
                         shards_down_message + f' {len(self.req.req_list)} unfinished requests.')
-            if self.num_batches % self.file_checkpoint == 0:
-                # cache current results
-                executor.submit(self.req.save_cache())
             if not check_total:
                 self.num_batches += 1
+                if self.num_batches % self.file_checkpoint == 0:
+                    # cache current results
+                    executor.submit(self.req.save_cache())
                 self._print_stats('Checkpoint')
             else:
                 break
@@ -235,7 +235,7 @@ class PushshiftAPIBase(object):
 
         while (self.req.limit is None or self.req.limit > 0) and not self.req.exit.is_set():
             # set/update limit
-            if 'ids' not in self.req.payload:
+            if 'ids' not in self.req.payload and len(self.req.req_list) == 0:
                 # check to see how many results are remaining
                 self.req.req_list.appendleft((url, self.req.payload))
                 self._multithread(check_total=True)
