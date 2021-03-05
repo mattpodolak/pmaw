@@ -1,3 +1,8 @@
+## 1.0.4 (2021/03/05)
+
+- None type comparison bug fixed
+- updated how limit was being updated for submission comment ids
+
 ## 1.0.3 (2021/02/19)
 
 - fixed early cache bug
