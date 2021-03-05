@@ -137,7 +137,6 @@ class PushshiftAPIBase(object):
                 payload = url_pay[1]
                 if not check_total:
                     self.req.save_resp(data)
-                    self.req.limit -= len(data)
 
                     log.info(f'Remaining limit {self.req.limit}')
                     if self.req.limit <= 0:

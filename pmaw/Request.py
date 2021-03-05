@@ -76,6 +76,10 @@ class Request(object):
         self.exit.set()
 
     def save_resp(self, results):
+        if self.kind == 'submission_comment_ids':
+            self.limit -= 1
+        else:
+            self.limit -= len(results)
         self.resp.responses.extend(results)
 
     def _add_nec_args(self, payload):

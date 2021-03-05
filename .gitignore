@@ -5,3 +5,4 @@ pmaw.egg-info
 /pmaw/__pycache__
 /examples/.ipynb_checkpoints
 /examples/cache
+pmaw.code-workspace
