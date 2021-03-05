@@ -123,9 +123,9 @@ class Request(object):
                 self._id_list(self.payload)
 
                 all_ids = self.payload['ids']
-                if len(all_ids) == 0 and self.limit > 0:
+                if len(all_ids) == 0 and (self.limit and self.limit > 0):
                     warnings.warn(
-                        f'{self.limit} items were not found in Pushshift')
+                        f'{self.limit} items were not found in Pushshift')                
                 self.limit = len(all_ids)
 
                 # remove ids from payload to prevent , -> %2C and increasing query length
