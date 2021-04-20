@@ -239,8 +239,11 @@ class PushshiftAPIBase(object):
                 self._multithread(check_total=True)
                 total_avail = self.metadata_.get('total_results', 0)
 
-                if self.req.limit is None or (self.req.limit and total_avail < self.req.limit):
-                    print(f'{total_avail} results available in Pushshift')
+                if self.req.limit is None:
+                    print(f'{total_avail} result(s) available in Pushshift')
+                    self.req.limit = total_avail
+                elif (total_avail < self.req.limit):
+                    print(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
                     self.req.limit = total_avail
 
             # generate payloads
