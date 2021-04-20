@@ -80,8 +80,6 @@ class RateLimit(object):
 
             try:
                 self.cache.remove(first_req)
-                log.debug(
-                    f'{first_req} has been removed from RL cache')
             except:
                 log.debug(f'{first_req} has already been removed RL cache')
 
@@ -98,7 +96,6 @@ class RateLimit(object):
             proj_rate = 60*(num_req)/(period)
 
             # check if projected rate is too high
-            log.debug(f'Projected {proj_rate} -- Desired {self.rate_limit}')
             if(proj_rate < self.rate_limit or num_req < 5):
                 return 0
             else:

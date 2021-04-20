@@ -45,7 +45,6 @@ class PushshiftAPIBase(object):
     def _impose_rate_limit(self):
         interval = self._rate_limit.delay()
         if interval > 0:
-            log.debug("Imposing rate limit, sleeping for %s" % interval)
             time.sleep(interval)
 
     def _get(self, url, payload={}):
