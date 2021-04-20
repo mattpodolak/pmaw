@@ -138,7 +138,7 @@ class PushshiftAPIBase(object):
                 if not check_total:
                     self.req.save_resp(data)
 
-                    log.info(f'Remaining limit {self.req.limit}')
+                    log.debug(f'Remaining limit {self.req.limit}')
                     if self.req.limit <= 0:
                         log.debug(
                             f'Cancelling {len(self.req.req_list)} unfinished requests')
