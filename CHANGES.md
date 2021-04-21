@@ -1,3 +1,10 @@
+## 1.0.5 (2021/04/21)
+
+- Moved remaining limit logging to DEBUG from INFO
+- Fixed generator incorrect length after being partially iterated through
+- Reduced the number of debug logs
+- Fixed duplicate responses being returned if the number of responses for a provided window is less than expected
+
 ## 1.0.4 (2021/03/05)
 
 - None type comparison bug fixed
