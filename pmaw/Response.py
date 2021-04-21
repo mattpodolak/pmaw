@@ -50,6 +50,8 @@ class Response(Generator):
 
     def __len__(self):
         if self._cache:
-            return len(self.responses) + self._cache.size - (self.i + self.num_returned)
+            length = len(self.responses) + self._cache.size - (self.i + self.num_returned) 
         else:
-            return len(self.responses) - self.i 
+            length = len(self.responses) - self.i  
+        
+        return max(length, 0)
