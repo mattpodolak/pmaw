@@ -45,7 +45,6 @@ class PushshiftAPIBase(object):
     def _impose_rate_limit(self):
         interval = self._rate_limit.delay()
         if interval > 0:
-            log.debug("Imposing rate limit, sleeping for %s" % interval)
             time.sleep(interval)
 
     def _get(self, url, payload={}):
@@ -138,7 +137,7 @@ class PushshiftAPIBase(object):
                 if not check_total:
                     self.req.save_resp(data)
 
-                    log.info(f'Remaining limit {self.req.limit}')
+                    log.debug(f'Remaining limit {self.req.limit}')
                     if self.req.limit <= 0:
                         log.debug(
                             f'Cancelling {len(self.req.req_list)} unfinished requests')
@@ -240,8 +239,11 @@ class PushshiftAPIBase(object):
                 self._multithread(check_total=True)
                 total_avail = self.metadata_.get('total_results', 0)
 
-                if self.req.limit is None or (self.req.limit and total_avail < self.req.limit):
-                    print(f'{total_avail} results available in Pushshift')
+                if self.req.limit is None:
+                    print(f'{total_avail} result(s) available in Pushshift')
+                    self.req.limit = total_avail
+                elif (total_avail < self.req.limit):
+                    print(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
                     self.req.limit = total_avail
 
             # generate payloads

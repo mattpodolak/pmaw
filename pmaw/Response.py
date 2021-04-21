@@ -10,6 +10,8 @@ class Response(Generator):
     def __init__(self, cache=None):
         self.responses = []
         self._cache = cache
+        # track length of remainder
+        self.num_returned = 0
         # indexing for returning responses
         self.i = 0
         self.num_cache = 0
@@ -29,6 +31,9 @@ class Response(Generator):
         elif self._cache and self.num_cache < len(self._cache.response_cache):
             self.responses = self._cache.load_resp(self.num_cache)
             self.num_cache += 1
+            # increase num returned to reflect responses retrieved from cache
+            # as well as previously returned responses
+            self.num_returned += (self.i + len(self.responses))
             self.i = 0
             return self._next_resp()
         else:
@@ -45,6 +50,8 @@ class Response(Generator):
 
     def __len__(self):
         if self._cache:
-            return len(self.responses) + self._cache.size
+            length = len(self.responses) + self._cache.size - (self.i + self.num_returned) 
         else:
-            return len(self.responses)
+            length = len(self.responses) - self.i  
+        
+        return max(length, 0)

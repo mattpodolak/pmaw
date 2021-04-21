@@ -5,7 +5,7 @@
 """
 PMAW: Pushshift Multithread API Wrapper
 """
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 __author__ = 'Matthew Podolak'
 __license__ = 'MIT'
 

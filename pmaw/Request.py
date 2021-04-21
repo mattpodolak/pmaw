@@ -170,6 +170,9 @@ class Request(object):
                 else:
                     before = self.payload['before']
                     after = self.payload['after']
+
+                    # set before to avoid repeated time slices when there are missed responses
+                    self.payload['before'] = after
                     num = batch_size
 
                 # generate payloads
