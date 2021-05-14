@@ -49,7 +49,7 @@ class Cache(object):
         try:
             with open(f'./{self.folder}/{self.key}_info.pickle', 'rb') as handle:
                 return pickle.load(handle)
-        except:
+        except Exception:
             log.info('No previous requests to load')
 
     def load_resp(self, cache_num):
