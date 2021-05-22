@@ -210,6 +210,7 @@ class PushshiftAPIBase(object):
                 search_window=365,
                 dataset='reddit',
                 safe_exit=False,
+                cache_dir=None,
                 **kwargs):
 
         # raise error if aggs are requested
@@ -219,7 +220,7 @@ class PushshiftAPIBase(object):
 
         self.metadata_ = {}
         self.req = Request(copy.deepcopy(kwargs), kind,
-                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit)
+                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=cache_dir)
 
         # reset stat tracking
         self._reset()
