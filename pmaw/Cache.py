@@ -16,7 +16,7 @@ class Cache(object):
         # generating key
         key_str = json.dumps(payload, sort_keys=True).encode("utf-8")
         self.key = hashlib.md5(key_str).hexdigest()
-        log.info(f'Response cache key: {self.key}')
+        print(f'Response cache key: {self.key}')
 
         # create cache folder
         self.folder = 'cache'

@@ -191,7 +191,7 @@ class PushshiftAPIBase(object):
         elif prefix == 'Total':
             if remaining < 0:
                 remaining = 0  # don't print a neg number
-            log.info(
+            print(
                 f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
 
     def _reset(self):
@@ -237,10 +237,10 @@ class PushshiftAPIBase(object):
                 total_avail = self.metadata_.get('total_results', 0)
 
                 if self.req.limit is None:
-                    log.info(f'{total_avail} result(s) available in Pushshift')
+                    print(f'{total_avail} result(s) available in Pushshift')
                     self.req.limit = total_avail
                 elif (total_avail < self.req.limit):
-                    log.info(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
+                    print(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
                     self.req.limit = total_avail
 
             # generate payloads
