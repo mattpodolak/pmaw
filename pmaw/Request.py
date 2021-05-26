@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 class Request(object):
     """Request: Handles request information, response saving, and cache usage."""
 
-    def __init__(self, payload, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit):
+    def __init__(self, payload, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None):
         self.kind = kind
         self.max_ids_per_request = min(1000, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
@@ -35,7 +35,7 @@ class Request(object):
             # instantiate cache
             _tmp = copy.deepcopy(payload)
             _tmp['kind'] = kind
-            self._cache = Cache(_tmp, safe_exit)
+            self._cache = Cache(_tmp, safe_exit, cache_dir=cache_dir)
             if safe_exit:
                 info = self._cache.load_info()
                 if info:
@@ -129,7 +129,7 @@ class Request(object):
                 all_ids = self.payload['ids']
                 if len(all_ids) == 0 and (self.limit and self.limit > 0):
                     warnings.warn(
-                        f'{self.limit} items were not found in Pushshift')                
+                        f'{self.limit} items were not found in Pushshift')
                 self.limit = len(all_ids)
 
                 # remove ids from payload to prevent , -> %2C and increasing query length
