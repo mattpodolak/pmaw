@@ -16,7 +16,7 @@ class Cache(object):
         # generating key
         key_str = json.dumps(payload, sort_keys=True).encode("utf-8")
         self.key = hashlib.md5(key_str).hexdigest()
-        print(f'Response cache key: {self.key}')
+        log.info(f'Response cache key: {self.key}')
 
         # create cache folder
         self.folder = 'cache'
@@ -35,7 +35,7 @@ class Cache(object):
             num_resp = len(responses)
             checkpoint = len(self.response_cache) + 1
             self.size += num_resp
-            print(
+            log.info(
                 f'File Checkpoint {checkpoint}:: Caching {num_resp} Responses')
 
             filename = f'{checkpoint}-{self.key}-{num_resp}.pickle'
