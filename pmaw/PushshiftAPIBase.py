@@ -1,15 +1,12 @@
 import time
-import datetime as dt
 import requests
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import copy
 import logging
-import warnings
 
 from pmaw.RateLimit import RateLimit
 from pmaw.Request import Request
-from pmaw.utils.slices import timeslice, mapslice
 
 log = logging.getLogger(__name__)
 
@@ -181,7 +178,7 @@ class PushshiftAPIBase(object):
         # shutdown executor
         try:
             exc.shutdown(wait=wait, cancel_futures=cancel_futures)
-        except:
+        except Exception:
             # TODO: manually cancel pending futures
             exc.shutdown(wait=wait)
 
@@ -189,7 +186,7 @@ class PushshiftAPIBase(object):
         rate = self.num_suc/self.num_req*100
         remaining = self.req.limit
         if (self.num_batches % self.checkpoint == 0) and prefix == 'Checkpoint':
-            print(
+            log.info(
                 f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
         elif prefix == 'Total':
             if remaining < 0:

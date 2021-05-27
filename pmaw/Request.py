@@ -42,7 +42,7 @@ class Request(object):
                     self.req_list.extend(info['req_list'])
                     self.payload = info['payload']
                     self.limit = info['limit']
-                    print(
+                    log.info(
                         f'Loaded Cache:: Responses: {self._cache.size} - Pending Requests: {len(self.req_list)} - Items Remaining: {self.limit}')
         else:
             self._cache = None
@@ -54,7 +54,7 @@ class Request(object):
         try:
             getattr(signal, 'SIGHUP')
             sigs = ('TERM', 'HUP', 'INT')
-        except:
+        except Exception:
             sigs = ('TERM', 'INT')
 
         for sig in sigs:

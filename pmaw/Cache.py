@@ -37,7 +37,7 @@ class Cache(object):
             num_resp = len(responses)
             checkpoint = len(self.response_cache) + 1
             self.size += num_resp
-            print(
+            log.info(
                 f'File Checkpoint {checkpoint}:: Caching {num_resp} Responses')
 
             filename = f'{checkpoint}-{self.key}-{num_resp}.pickle.gz'
@@ -51,7 +51,7 @@ class Cache(object):
         try:
             with gzip.open(f'{self.folder}/{self.key}_info.pickle.gz', 'rb') as handle:
                 return pickle.load(handle)
-        except:
+        except Exception:
             log.info('No previous requests to load')
 
     def load_resp(self, cache_num):
