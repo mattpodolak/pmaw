@@ -1,3 +1,10 @@
+## 1.1.0 (2021/05/27)
+
+- Added gzip for cached pickle files
+- Exception handling is now slightly more specific
+- Updated many print statements to output via logging
+- Fixed issue with safe_exit not saving info
+
 ## 1.0.5 (2021/04/21)
 
 - Moved remaining limit logging to DEBUG from INFO

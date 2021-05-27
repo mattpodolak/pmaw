@@ -63,7 +63,7 @@ class Request(object):
     def save_cache(self):
         # trim extra responses
         self.trim()
-        if self.safe_exit and self.limit and (self.limit == 0 or self.exit.is_set()):
+        if self.safe_exit and not self.limit == None and (self.limit == 0 or self.exit.is_set()):
             # save request info to cache
             self._cache.save_info(req_list=self.req_list,
                                   payload=self.payload, limit=self.limit)
@@ -190,3 +190,4 @@ class Request(object):
         if self.limit and self.limit < 0:
             log.debug(f'Trimming {self.limit*-1} requests')
             self.resp.responses = self.resp.responses[:self.limit]
+            self.limit = 0
