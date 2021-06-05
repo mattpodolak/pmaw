@@ -47,7 +47,7 @@ $ pip install pmaw
 ### General Usage
 
 ```python
-from pmaw import PushshiftAPI()
+from pmaw import PushshiftAPI
 api = PushshiftAPI()
 ```
 
