@@ -16,7 +16,7 @@ class PushshiftAPIBase(object):
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
-                 checkpoint=10, file_checkpoint=20):
+                 checkpoint=10, file_checkpoint=20, praw=None):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -24,6 +24,7 @@ class PushshiftAPIBase(object):
         self.resp_dict = {}
         self.checkpoint = checkpoint
         self.file_checkpoint = file_checkpoint
+        self.praw = praw
 
         if batch_size:
             self.batch_size = batch_size
@@ -42,7 +43,7 @@ class PushshiftAPIBase(object):
     def _impose_rate_limit(self):
         interval = self._rate_limit.delay()
         if interval > 0:
-            time.sleep(interval)
+            self.req._idle_task(interval)
 
     def _get(self, url, payload={}):
         self._impose_rate_limit()
@@ -217,7 +218,7 @@ class PushshiftAPIBase(object):
 
         self.metadata_ = {}
         self.req = Request(copy.deepcopy(kwargs), kind,
-                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=cache_dir)
+                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir, self.praw)
 
         # reset stat tracking
         self._reset()

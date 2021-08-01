@@ -3,12 +3,14 @@ import copy
 import datetime as dt
 from collections import deque
 import warnings
+from threading import Event
+import signal
+import time
 
 from pmaw.Cache import Cache
 from pmaw.utils.slices import timeslice, mapslice
 from pmaw.Response import Response
-from threading import Event
-import signal
+
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +18,7 @@ log = logging.getLogger(__name__)
 class Request(object):
     """Request: Handles request information, response saving, and cache usage."""
 
-    def __init__(self, payload, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None):
+    def __init__(self, payload, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None):
         self.kind = kind
         self.max_ids_per_request = min(1000, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
@@ -26,7 +28,19 @@ class Request(object):
         self.payload = payload
         self.limit = payload.get('limit', None)
         self.exit = Event()
+        self.praw = praw
 
+        if self.praw is not None:
+            if safe_exit:
+                raise NotImplementedError('safe_exit is not implemented when PRAW is used for metadata enrichment')
+            
+            self.payload['filter'] = 'id'
+            self.enrich_list = deque()
+            if kind == "submission":
+                self.prefix = "t3_"
+            else:
+                self.prefix = "t1_"
+            
         if 'ids' not in self.payload:
             # add necessary args
             self._add_nec_args(self.payload)
@@ -60,6 +74,43 @@ class Request(object):
         for sig in sigs:
             signal.signal(getattr(signal, 'SIG'+sig), self._exit)
 
+    def _idle_task(self, interval):
+        print(f'INTERVAL {interval}')
+        if self.praw:
+            start = time.time()
+            current = time.time()
+            # make multiple enrich requests based on sleep interval
+            while current - start < interval:
+                print('ENRICHING DATA')
+                # create batch of fullnames up to 100
+                fullnames = []
+                while len(fullnames) < 100:
+                    try:
+                        fullnames.append(self.enrich_list.popleft())
+                    except IndexError:
+                        break
+                
+                # exit loop if nothing to enrich
+                if len(fullnames) == 0:
+                    break
+                
+                try:
+                    # TODO: may need to change praw usage based on multithread performance
+                    resp_gen = self.praw.info(fullnames=fullnames)
+                    praw_data = [vars(obj) for obj in resp_gen]
+                    self.resp.responses.extend(praw_data)
+                    
+                    # some ids returned by Pushshift may not be available via PRAW
+                    self.limit -= len(fullnames)
+                except Exception as exc:
+                    print(f'PRAW ENRICH EXCPETION {exc}')
+                    self.enrich_list.extend(fullnames)
+                
+                current = time.time()
+
+        else:
+            time.sleep(interval)
+
     def save_cache(self):
         # trim extra responses
         self.trim()
@@ -76,11 +127,15 @@ class Request(object):
         self.exit.set()
 
     def save_resp(self, results):
-        if self.kind == 'submission_comment_ids':
-            self.limit -= 1
+        if self.praw:
+            # save fullnames of objects to be enriched with metadata by PRAW
+            self.enrich_list.extend([self.prefix+res['id'] for res in results])
         else:
-            self.limit -= len(results)
-        self.resp.responses.extend(results)
+            if self.kind == 'submission_comment_ids':
+                self.limit -= 1
+            else:
+                self.limit -= len(results)
+            self.resp.responses.extend(results)
 
     def _add_nec_args(self, payload):
         """Adds arguments to the payload as necessary."""

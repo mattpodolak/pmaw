@@ -1,13 +1,4 @@
-import copy
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
-from collections import deque
-import logging
-
 from pmaw.PushshiftAPIBase import PushshiftAPIBase
-
-log = logging.getLogger(__name__)
-
 
 class PushshiftAPI(PushshiftAPIBase):
     def __init__(self, *args, **kwargs):
@@ -26,6 +17,7 @@ class PushshiftAPI(PushshiftAPIBase):
             jitter (str, optional) - Jitter to use with backoff, defaults to None, options are None, full, equal, decorr
             checkpoint (int, optional) - Size of interval in batches to print a checkpoint with stats, defaults to 10
             file_checkpoint (int, optional) - Size of interval in batches to cache responses when using mem_safe, defaults to 20
+            praw (praw.Reddit, optional) - Used to enrich the Pushshift items retrieved with metadata directly from Reddit
         """
         super().__init__(*args, **kwargs)
 

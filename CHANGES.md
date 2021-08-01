@@ -1,3 +1,7 @@
+## 2.0.0 (2021/08/xx)
+
+- Added support for enriching result metadata using PRAW
+
 ## 1.1.0 (2021/05/27)
 
 - Added gzip for cached pickle files
