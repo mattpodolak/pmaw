@@ -74,37 +74,38 @@ class Request(object):
         for sig in sigs:
             signal.signal(getattr(signal, 'SIG'+sig), self._exit)
 
+    def _enrich_data(self):
+        print('ENRICHING DATA')
+        # create batch of fullnames up to 100
+        fullnames = []
+        while len(fullnames) < 100:
+            try:
+                fullnames.append(self.enrich_list.popleft())
+            except IndexError:
+                break
+        
+        # exit loop if nothing to enrich
+        if len(fullnames) == 0:
+            return
+        
+        try:
+            # TODO: may need to change praw usage based on multithread performance
+            resp_gen = self.praw.info(fullnames=fullnames)
+            praw_data = [vars(obj) for obj in resp_gen]
+            self.resp.responses.extend(praw_data)
+            
+        except Exception as exc:
+            print(f'PRAW ENRICH EXCPETION {exc}')
+            self.enrich_list.extend(fullnames)
+
     def _idle_task(self, interval):
-        print(f'INTERVAL {interval}')
         if self.praw:
             start = time.time()
             current = time.time()
             # make multiple enrich requests based on sleep interval
-            while current - start < interval:
-                print('ENRICHING DATA')
-                # create batch of fullnames up to 100
-                fullnames = []
-                while len(fullnames) < 100:
-                    try:
-                        fullnames.append(self.enrich_list.popleft())
-                    except IndexError:
-                        break
+            while current - start < interval and len(self.enrich_list) > 0:
                 
-                # exit loop if nothing to enrich
-                if len(fullnames) == 0:
-                    break
-                
-                try:
-                    # TODO: may need to change praw usage based on multithread performance
-                    resp_gen = self.praw.info(fullnames=fullnames)
-                    praw_data = [vars(obj) for obj in resp_gen]
-                    self.resp.responses.extend(praw_data)
-                    
-                    # some ids returned by Pushshift may not be available via PRAW
-                    self.limit -= len(fullnames)
-                except Exception as exc:
-                    print(f'PRAW ENRICH EXCPETION {exc}')
-                    self.enrich_list.extend(fullnames)
+                self._enrich_data()
                 
                 current = time.time()
 
@@ -114,6 +115,12 @@ class Request(object):
     def save_cache(self):
         # trim extra responses
         self.trim()
+
+        # enrich if needed
+        if self.praw:
+            while len(self.enrich_list) > 0:
+                self._enrich_data()
+
         if self.safe_exit and not self.limit == None and (self.limit == 0 or self.exit.is_set()):
             # save request info to cache
             self._cache.save_info(req_list=self.req_list,
@@ -127,14 +134,15 @@ class Request(object):
         self.exit.set()
 
     def save_resp(self, results):
+        if self.kind == 'submission_comment_ids':
+            self.limit -= 1
+        else:
+            self.limit -= len(results)
+            
         if self.praw:
             # save fullnames of objects to be enriched with metadata by PRAW
             self.enrich_list.extend([self.prefix+res['id'] for res in results])
         else:
-            if self.kind == 'submission_comment_ids':
-                self.limit -= 1
-            else:
-                self.limit -= len(results)
             self.resp.responses.extend(results)
 
     def _add_nec_args(self, payload):
@@ -242,7 +250,15 @@ class Request(object):
                 payload['ids'] = list(payload['ids'])
 
     def trim(self):
-        if self.limit and self.limit < 0:
-            log.debug(f'Trimming {self.limit*-1} requests')
-            self.resp.responses = self.resp.responses[:self.limit]
-            self.limit = 0
+        if self.limit:
+            if self.praw:
+                while self.limit < 0:
+                    try:
+                        self.enrich_list.pop()
+                        self.limit += 1
+                    except IndexError as exc:
+                        break
+            if self.limit < 0:
+                log.debug(f'Trimming {self.limit*-1} requests')
+                self.resp.responses = self.resp.responses[:self.limit]
+                self.limit = 0

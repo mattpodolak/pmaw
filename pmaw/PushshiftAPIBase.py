@@ -80,48 +80,48 @@ class PushshiftAPIBase(object):
         return shards['successful'] != shards['total']
 
     def _multithread(self, check_total=False):
-        executor = ThreadPoolExecutor(max_workers=self.num_workers)
+        with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
 
-        while len(self.req.req_list) > 0 and not self.req.exit.is_set():
-            # reset resp_dict which tracks remaining responses for timeslices
-            self.resp_dict = {}
+            while len(self.req.req_list) > 0 and not self.req.exit.is_set():
+                # reset resp_dict which tracks remaining responses for timeslices
+                self.resp_dict = {}
 
-            # set number of futures created to batch size
-            reqs = []
-            if check_total:
-                reqs.append(self.req.req_list.popleft())
-            else:
-                for i in range(min(len(self.req.req_list), self.batch_size)):
+                # set number of futures created to batch size
+                reqs = []
+                if check_total:
                     reqs.append(self.req.req_list.popleft())
+                else:
+                    for i in range(min(len(self.req.req_list), self.batch_size)):
+                        reqs.append(self.req.req_list.popleft())
 
-            futures = {executor.submit(
-                self._get, url_pay[0], url_pay[1]): url_pay for url_pay in reqs}
+                futures = {executor.submit(
+                    self._get, url_pay[0], url_pay[1]): url_pay for url_pay in reqs}
 
-            self._futures_handler(futures, check_total)
+                self._futures_handler(futures, check_total)
 
-            # reset attempts if no failures
-            self._rate_limit._check_fail()
+                # reset attempts if no failures
+                self._rate_limit._check_fail()
 
-            # check if shards are down
-            if self.shards_are_down and (self.shards_down_behavior is not None):
-                shards_down_message = "Not all PushShift shards are active. Query results may be incomplete."
-                if self.shards_down_behavior == 'warn':
-                    log.warning(shards_down_message)
-                if self.shards_down_behavior == 'stop':
-                    self._shutdown(executor)
-                    raise RuntimeError(
-                        shards_down_message + f' {len(self.req.req_list)} unfinished requests.')
+                # check if shards are down
+                if self.shards_are_down and (self.shards_down_behavior is not None):
+                    shards_down_message = "Not all PushShift shards are active. Query results may be incomplete."
+                    if self.shards_down_behavior == 'warn':
+                        log.warning(shards_down_message)
+                    if self.shards_down_behavior == 'stop':
+                        self._shutdown(executor)
+                        raise RuntimeError(
+                            shards_down_message + f' {len(self.req.req_list)} unfinished requests.')
+                if not check_total:
+                    self.num_batches += 1
+                    if self.num_batches % self.file_checkpoint == 0:
+                        # cache current results
+                        executor.submit(self.req.save_cache())
+                    self._print_stats('Checkpoint')
+                else:
+                    break
             if not check_total:
-                self.num_batches += 1
-                if self.num_batches % self.file_checkpoint == 0:
-                    # cache current results
-                    executor.submit(self.req.save_cache())
-                self._print_stats('Checkpoint')
-            else:
-                break
-        if not check_total:
-            self._print_stats('Total')
-        self._shutdown(executor)
+                self._print_stats('Total')
+            self._shutdown(executor)
 
     def _futures_handler(self, futures, check_total):
         for future in as_completed(futures):
