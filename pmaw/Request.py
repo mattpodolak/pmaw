@@ -101,9 +101,10 @@ class Request(object):
             self.enrich_list.extend(fullnames)
 
     def _idle_task(self, interval):
+        start = time.time()
+        current = time.time()
+
         if self.praw:
-            start = time.time()
-            current = time.time()
             # make multiple enrich requests based on sleep interval
             while current - start < interval and len(self.enrich_list) > 0:
                 
@@ -111,8 +112,11 @@ class Request(object):
                 
                 current = time.time()
 
-        else:
-            time.sleep(interval)
+        current = time.time()
+        diff = (current - start)
+
+        if diff < interval and diff >= 0:
+            time.sleep(interval-diff)
 
     def save_cache(self):
         # trim extra responses
