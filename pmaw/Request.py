@@ -33,9 +33,13 @@ class Request(object):
         if self.praw is not None:
             if safe_exit:
                 raise NotImplementedError('safe_exit is not implemented when PRAW is used for metadata enrichment')
-            
-            self.payload['filter'] = 'id'
+
             self.enrich_list = deque()
+            
+            if not kind == 'submission_comment_ids' :
+                # id filter causes an error for submission_comment_ids endpoint
+                self.payload['filter'] = 'id'
+
             if kind == "submission":
                 self.prefix = "t3_"
             else:
@@ -75,7 +79,6 @@ class Request(object):
             signal.signal(getattr(signal, 'SIG'+sig), self._exit)
 
     def _enrich_data(self):
-        print('ENRICHING DATA')
         # create batch of fullnames up to 100
         fullnames = []
         while len(fullnames) < 100:
@@ -95,7 +98,6 @@ class Request(object):
             self.resp.responses.extend(praw_data)
             
         except Exception as exc:
-            print(f'PRAW ENRICH EXCPETION {exc}')
             self.enrich_list.extend(fullnames)
 
     def _idle_task(self, interval):
@@ -141,7 +143,10 @@ class Request(object):
             
         if self.praw:
             # save fullnames of objects to be enriched with metadata by PRAW
-            self.enrich_list.extend([self.prefix+res['id'] for res in results])
+            if self.kind == 'submission_comment_ids':
+                self.enrich_list.extend([self.prefix+res for res in results])
+            else:
+                self.enrich_list.extend([self.prefix+res['id'] for res in results])
         else:
             self.resp.responses.extend(results)
 
