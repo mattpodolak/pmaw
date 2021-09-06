@@ -217,6 +217,7 @@ class PushshiftAPIBase(object):
             raise NotImplementedError(err_msg.format(kwargs['aggs']))
 
         self.metadata_ = {}
+        self.resp_dict = {}
         self.req = Request(copy.deepcopy(kwargs), kind,
                            max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir, self.praw)
 
