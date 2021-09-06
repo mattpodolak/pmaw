@@ -143,7 +143,7 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 
 ## `search_submissions` and `search_comments`
 
-- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 1000, maximum 1000.
+- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 500, maximum 500.
 - `max_results_per_request` (int, optional): Maximum number of items to return in a single non-id based request, defaults to 100, maximum 100.
 - `mem_safe` (boolean, optional): If True, stores responses in cache during operation, defaults to False
 - `search_window` (int, optional): Size in days for search window for submissions / comments in non-id based search, defaults to 365
@@ -158,7 +158,7 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 ## `search_submission_comment_ids`
 
 - `ids` is a required parameter and should be an array of submission ids, a single id can be passed as a string
-- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 1000, maximum 1000.
+- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 500, maximum 500.
 - `mem_safe` (boolean, optional): If True, stores responses in cache during operation, defaults to False
 - `safe_exit` (boolean, optional): If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
 

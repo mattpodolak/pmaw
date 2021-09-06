@@ -202,7 +202,7 @@ class PushshiftAPIBase(object):
 
     def _search(self,
                 kind,
-                max_ids_per_request=1000,
+                max_ids_per_request=500,
                 max_results_per_request=100,
                 mem_safe=False,
                 search_window=365,

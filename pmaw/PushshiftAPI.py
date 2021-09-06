@@ -27,7 +27,7 @@ class PushshiftAPI(PushshiftAPIBase):
 
         Input:
             ids (str, list) - Submission id(s) to return the comment ids of
-            max_ids_per_request (int, optional) - Maximum number of ids to use in a single request, defaults to 1000, maximum 1000.
+            max_ids_per_request (int, optional) - Maximum number of ids to use in a single request, defaults to 500, maximum 500.
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
         Output:
@@ -41,7 +41,7 @@ class PushshiftAPI(PushshiftAPIBase):
         Method for searching comments, returns an array of comments
 
         Input:
-            max_ids_per_request (int, optional) - Maximum number of ids to use in a single request, defaults to 1000, maximum 1000.
+            max_ids_per_request (int, optional) - Maximum number of ids to use in a single request, defaults to 500, maximum 500.
             max_results_per_request (int, optional) - Maximum number of items to return in a single non-id based request, defaults to 100, maximum 100.
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             search_window (int, optional) - Size in days for search window for submissions / comments in non-id based search, defaults to 365
@@ -56,7 +56,7 @@ class PushshiftAPI(PushshiftAPIBase):
         Method for searching submissions, returns an array of submissions
 
         Input:
-            max_ids_per_request (int, optional) - Maximum number of ids to use in a single request, defaults to 1000, maximum 1000.
+            max_ids_per_request (int, optional) - Maximum number of ids to use in a single request, defaults to 500, maximum 500.
             max_results_per_request (int, optional) - Maximum number of items to return in a single non-id based request, defaults to 100, maximum 100.
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             search_window (int, optional) - Size in days for search window for submissions / comments in non-id based search, defaults to 365

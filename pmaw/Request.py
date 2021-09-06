@@ -20,7 +20,7 @@ class Request(object):
 
     def __init__(self, payload, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None):
         self.kind = kind
-        self.max_ids_per_request = min(1000, max_ids_per_request)
+        self.max_ids_per_request = min(500, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
         self.safe_exit = safe_exit
         self.mem_safe = mem_safe
