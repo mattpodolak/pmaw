@@ -1,0 +1,235 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://api.pushshift.io/reddit/comment/search?ids=gjacwx5,gjad2l6,gjadatw,gjadc7w,gjadcwh,gjadgd7,gjadlbc,gjadnoc,gjadog1,gjadphb&filter=id
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6vmUlBQUFBKSSxJVLJSiAbzQKAazgLLZ6YoWSkopWclJpdXmCrB5Wp1CGpIMcox
+        I01DYkk5aRqSzUnVUJ5Bmob0FHPSNOQkJZOmIS+fRA356YakaSjISELSAGbFctUCACL2XKYAAgAA
+    headers:
+      CF-Cache-Status:
+      - EXPIRED
+      CF-RAY:
+      - 68aa5d77f8765419-YYZ
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 06 Sep 2021 20:14:44 GMT
+      Expect-CT:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Last-Modified:
+      - Mon, 06 Sep 2021 18:27:08 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=skUCIH2wOwHhxyDfkLeipV2V8yt3dzgZKIJwpERvZ4dR3xgMkSfm1mO3MKBIxVMn2Nh3EHvC2eiUKMy9XvXIZzsqqNiHxETdzQ%2FCqOVRWg6DjnkwgkrTMerKpt%2F9ySjC6Feb"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400, h3-28=":443"; ma=86400, h3-27=":443";
+        ma=86400
+      cache-control:
+      - public, max-age=1, s-maxage=1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: grant_type=client_credentials
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - close
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - 'python: PMAW v2 endpoint testing (by u/potato-sword) PRAW/7.4.0 prawcore/2.3.0'
+    method: POST
+    uri: https://www.reddit.com/api/v1/access_token
+  response:
+    body:
+      string: '{"access_token": "-4uIIMpDagkzEBoDIq8z72RyhdnHPow", "token_type": "bearer",
+        "expires_in": 3600, "scope": "*"}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - close
+      Content-Length:
+      - '109'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 06 Sep 2021 20:14:44 GMT
+      Server:
+      - snooserv
+      Set-Cookie:
+      - edgebucket=XreUlfBxUYDdPwXofO; Domain=reddit.com; Max-Age=63071999; Path=/;  secure
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Via:
+      - 1.1 varnish
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      X-Moose:
+      - majestic
+      cache-control:
+      - max-age=0, must-revalidate
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ratelimit-remaining:
+      - '299'
+      x-ratelimit-reset:
+      - '316'
+      x-ratelimit-used:
+      - '1'
+      x-reddit-loid:
+      - 0000000000edkb2hvn.2.1630959284353.Z0FBQUFBQmhObmEwVG4wS0tOVC1JNjVtRktoUmtQVnBrZGQyVDMwOFI0V1c4aUl6Mjk1LW9IQ2VjSW95X1NzanJZMjNEbWxpM1JQVXJVZnVsS3R5eFJaS25oRzVmNVVYa0dCbE12cUEwZnQtYld2c2UyRnhGZ3IzUGJDVFFwQWxlcUJGTVQ1eEpwOHY
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Cookie:
+      - edgebucket=XreUlfBxUYDdPwXofO
+      User-Agent:
+      - 'python: PMAW v2 endpoint testing (by u/potato-sword) PRAW/7.4.0 prawcore/2.3.0'
+    method: GET
+    uri: https://oauth.reddit.com/api/info/?id=t1_gjacwx5%2Ct1_gjad2l6%2Ct1_gjadatw%2Ct1_gjadc7w%2Ct1_gjadcwh%2Ct1_gjadgd7%2Ct1_gjadlbc%2Ct1_gjadnoc%2Ct1_gjadog1%2Ct1_gjadphb&raw_json=1
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2312'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 06 Sep 2021 20:14:44 GMT
+      Server:
+      - snooserv
+      Set-Cookie:
+      - loid=0000000000edkb2hvn.2.1630959284353.Z0FBQUFBQmhObmEwVmp2Wi1yZG5uWHVLRkZDb05zelpFY0ZuLTBFbmhwWnAtcWxkdkJrTUFiakhfNlhZWHZleGtOTHRuQ1N3UmJIcl9RN2FUa0M3OWhoWVQ0aVFBeXVVUUpjUWloU0RSbFBycWVpTUVRZkI0MU1yTXhZZ1ZKMS1XY2pfMTV1VVZlVEI;
+        Domain=reddit.com; Max-Age=63071999; Path=/; expires=Wed, 06-Sep-2023 20:14:44
+        GMT; secure; SameSite=None; Secure
+      - session_tracker=krbbcpbibdmbmpohem.0.1630959284459.Z0FBQUFBQmhObmEwU0pvajNaTjdrZnRzazd6MndrSHFubzFidXdCODB6bjhQZU9JODhuM3JiQ3ZOWm5ZQnp4MVN6Mm9iUFNBTy1XWk1YX1pPanc2X052ejJtdU1xOVdmTzhMYjFSVHJLcE0xV2htQjFreUlQQ20tMTRoTjRxS0NEZW15V3diR3JvNVg;
+        Domain=reddit.com; Max-Age=7199; Path=/; expires=Mon, 06-Sep-2021 22:14:44
+        GMT; secure; SameSite=None; Secure
+      - csv=1; Max-Age=63072000; Domain=.reddit.com; Path=/; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Vary:
+      - accept-encoding
+      Via:
+      - 1.1 varnish
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      X-Moose:
+      - majestic
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-Moose
+      cache-control:
+      - max-age=0, must-revalidate
+      content-encoding:
+      - gzip
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ratelimit-remaining:
+      - '299'
+      x-ratelimit-reset:
+      - '316'
+      x-ratelimit-used:
+      - '1'
+      x-ua-compatible:
+      - IE=edge
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1
