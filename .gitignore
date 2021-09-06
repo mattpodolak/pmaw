@@ -1,6 +1,7 @@
 /dist
 /build
 /examples/.ipynb_checkpoints
+/notebook-tests
 .pytest_cache
 .coverage
 .env
