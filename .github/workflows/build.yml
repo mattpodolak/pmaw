@@ -1,0 +1,33 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.4
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |
+            sudo pip install --upgrade pip
+            python setup.py sdist bdist_wheel
+            sudo pip install coverage pytest praw vcr dotenv
+            sudo pip install .
+      - run:
+          name: run tests
+          command: |
+            mkdir test-results
+            coverage run --source=. -m pytest --junitxml=test-results/junit.xml
+            coverage html
+            coverage xml
+      - codecov/upload:
+          file: coverage.xml
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: htmlcov
+workflows:
+  build_test:
+    jobs:
+      - build

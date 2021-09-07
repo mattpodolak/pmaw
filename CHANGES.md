@@ -3,6 +3,7 @@
 - Added support for enriching result metadata using PRAW
 - Implemented functional tests
 - Reduced `max_ids_per_request` to 500
+- Added automated testing
 
 ## 1.1.0 (2021/05/27)
 
