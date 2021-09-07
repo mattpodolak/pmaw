@@ -12,7 +12,7 @@ jobs:
           command: |
             sudo pip install --upgrade pip
             python setup.py sdist bdist_wheel
-            sudo pip install coverage pytest praw vcr dotenv
+            sudo pip install coverage pytest praw vcrpy python-dotenv
             sudo pip install .
       - run:
           name: run tests
