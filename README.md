@@ -1,5 +1,7 @@
 <h2 align="center">PMAW: Pushshift Multithread API Wrapper</h2>
 
+[![CircleCI](https://circleci.com/gh/mattpodolak/pmaw.svg?style=shield)](https://circleci.com/gh/mattpodolak/pmaw)
+[![codecov.io](https://codecov.io/github/mattpodolak/pmaw/coverage.svg?branch=master)](https://codecov.io/github/mattpodolak/pmaw)
 [![PyPI Version](https://img.shields.io/pypi/v/pmaw?color=blue)](https://pypi.org/project/pmaw/)
 [![Python Version](https://img.shields.io/pypi/pyversions/pmaw?color=blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -22,7 +24,7 @@
 
 # Description
 
-**PMAW** is an ultra minimalist wrapper for the Pushshift API which uses multithreading to retrieve Reddit comments and submissions. General usage is through the `PushshiftAPI` class which provides methods for interacting with different `Pushshift` endpoints, please view the [Pushshift Docs](https://github.com/pushshift/api) for more details on the endpoints and accepted parameters. Parameters are provided through keyword arguments when calling the method, some methods will have required parameters. When using a method **PMAW** will complete all the required API calls to complete the query before returning a `Response` generator object.
+**PMAW** is a wrapper for the Pushshift API which uses multithreading to retrieve Reddit comments and submissions. General usage is through the `PushshiftAPI` class which provides methods for interacting with different `Pushshift` endpoints, please view the [Pushshift Docs](https://github.com/pushshift/api) for more details on the endpoints and accepted parameters. Parameters are provided through keyword arguments when calling the method, some methods will have required parameters. When using a method **PMAW** will complete all the required API calls to complete the query before returning a `Response` generator object.
 
 The following three methods are currently supported:
 
