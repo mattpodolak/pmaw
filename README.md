@@ -11,7 +11,12 @@
 - [Features](#features)
 - [Parameters](#parameters)
 - [Examples](#examples)
+  - [Comments](#comments)
+  - [Submissions](#submissions)
 - [Advanced Examples](#advanced-examples)
+  - [PRAW Enrichment](#praw-enrichment)
+  - [Memory Safety](#memory-safety)
+  - [Safe Exiting](#safe-exiting)
 - [Benchmarks](#benchmarks)
 - [Deprecated Examples](#deprecated-examples)
 
@@ -134,6 +139,7 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 - `jitter` (str, optional): Jitter to use with backoff, options are None, 'full', 'equal', 'decorr'. Defaults to None.
 - `checkpoint` (int, optional): Size of interval in batches to print a checkpoint with stats, defaults to 10
 - `file_checkpoint` (int, optional) - Size of interval in batches to cache responses when using mem_safe, defaults to 20
+- `praw` (praw.Reddit, optional) - Used to enrich the Pushshift items retrieved with metadata directly from Reddit
 
 ### `Response`
 
@@ -175,6 +181,8 @@ The following examples are for `pmaw` version >= 1.0.0.
 ### Search Comments
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 comments = api.search_comments(subreddit="science", limit=1000)
 comment_list = [comment for comment in comments]
@@ -183,6 +191,8 @@ comment_list = [comment for comment in comments]
 ### Search Comments by IDs
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 comment_ids = ['gjacwx5','gjad2l6','gjadatw','gjadc7w','gjadcwh',
   'gjadgd7','gjadlbc','gjadnoc','gjadog1','gjadphb']
@@ -197,6 +207,8 @@ You can supply a single comment by passing the id as a string or an array with a
 ### Search Comment IDs by Submission ID
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 post_ids = ['kxi2w8','kxi2g1','kxhzrl','kxhyh6','kxhwh0',
   'kxhv53','kxhm7b','kxhm3s','kxhg37','kxhak9']
@@ -213,6 +225,8 @@ You can supply a single submission by passing the id as a string or an array wit
 ### Search Submissions
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 posts = api.search_submissions(subreddit="science", limit=1000)
 post_list = [post for post in posts]
@@ -221,6 +235,8 @@ post_list = [post for post in posts]
 ### Search Submissions by IDs
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 post_ids = ['kxi2w8','kxi2g1','kxhzrl','kxhyh6','kxhwh0',
   'kxhv53','kxhm7b','kxhm3s','kxhg37','kxhak9']
@@ -234,11 +250,33 @@ You can supply a single submission by passing the id as a string or an array wit
 
 # Advanced Examples
 
+## PRAW Enrichment
+
+Enrich results with the most recent metadata from Reddit by passing a PRAW Reddit instance when instantiating the PushshiftAPI.
+
+If you don’t already have a client ID and client secret, follow Reddit’s [First Steps Guide](https://github.com/reddit-archive/reddit/wiki/OAuth2-Quick-Start-Example#first-steps) to create them. A user agent is a unique identifier that helps Reddit determine the source of network requests. To use Reddit’s API, you need a unique and descriptive user agent.
+
+```python
+import praw
+from pmaw import PushshiftAPI
+
+reddit = praw.Reddit(
+ client_id='YOUR_CLIENT_ID',
+ client_secret='YOUR_CLIENT_SECRET',
+ user_agent=f'python: PMAW request enrichment (by u/YOUR_USERNAME)'
+)
+
+api_praw = PushshiftAPI(praw=reddit)
+comments = api_praw.search_comments(q="quantum", subreddit="science", limit=100, before=1629990795)
+```
+
 ## Memory Safety
 
 If you are pulling large amounts of data or have a limited amount of RAM, using the memory safety feature will help you avoid an out of memory error from being thrown during data retrieval.
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 posts = api.search_submissions(subreddit="science", limit=700000, mem_safe=True)
 print(f'{len(posts)} posts retrieved from Pushshift')
@@ -263,6 +301,8 @@ api = PushshiftAPI(file_checkpoint=10)
 If you expect that your query may be interrupted while its running, setting `safe_exit=True` will cache responses and unfinished requests before exiting when an interrupt signal is received. Re-running a `search` method with the exact same parameters that you have ran before will load previous responses and any unfinished requests from the cache, allowing it to resume if all the required responses have not yet been retrieved.
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 posts = api.search_submissions(subreddit="science", limit=700000, before=1613234822, safe_exit=True)
 print(f'{len(posts)} posts retrieved from Pushshift')
