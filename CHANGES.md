@@ -4,6 +4,7 @@
 - Implemented functional tests
 - Reduced `max_ids_per_request` to 500
 - Added automated testing
+- Increased exception handling specificity
 
 ## 1.1.0 (2021/05/27)
 

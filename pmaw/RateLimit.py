@@ -80,7 +80,7 @@ class RateLimit(object):
 
             try:
                 self.cache.remove(first_req)
-            except Exception:
+            except ValueError:
                 log.debug(f'{first_req} has already been removed RL cache')
 
             num_req = len(self.cache)

@@ -1,5 +1,5 @@
-import time
 import requests
+from requests import HTTPError
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import copy
@@ -70,7 +70,7 @@ class PushshiftAPIBase(object):
 
             return r['data']
         else:
-            raise Exception(f"HTTP {status} - {reason}")
+            raise HTTPError(f"HTTP {status} - {reason}")
 
     @property
     def shards_are_down(self):
@@ -170,7 +170,7 @@ class PushshiftAPIBase(object):
                             # generate payloads
                             self.req.gen_slices(
                                 url, payload, after, before, num)
-            except Exception as exc:
+            except HTTPError as exc:
                 log.debug(f"Request Failed -- {exc}")
                 self._rate_limit._req_fail()
                 self.req.req_list.appendleft(url_pay)
@@ -178,8 +178,9 @@ class PushshiftAPIBase(object):
     def _shutdown(self, exc, wait=False, cancel_futures=True):
         # shutdown executor
         try:
+            # pass cancel_futures keywords avail in python 3.9
             exc.shutdown(wait=wait, cancel_futures=cancel_futures)
-        except Exception:
+        except TypeError:
             # TODO: manually cancel pending futures
             exc.shutdown(wait=wait)
 
@@ -194,6 +195,10 @@ class PushshiftAPIBase(object):
                 remaining = 0  # don't print a neg number
             print(
                 f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
+            if(self.req.praw and len(self.req.enrich_list) > 0):
+                # let the user know praw enrichment is still in progress so it doesnt appear to hang after
+                # finishing retrieval from Pushshift
+                print(f'Finishing enrichment for {len(self.req.enrich_list)} items')
 
     def _reset(self):
         self.num_suc = 0
@@ -201,6 +206,7 @@ class PushshiftAPIBase(object):
         self.num_batches = 0
 
     def _search(self,
+                filter_fn,
                 kind,
                 max_ids_per_request=500,
                 max_results_per_request=100,
@@ -218,7 +224,7 @@ class PushshiftAPIBase(object):
 
         self.metadata_ = {}
         self.resp_dict = {}
-        self.req = Request(copy.deepcopy(kwargs), kind,
+        self.req = Request(copy.deepcopy(kwargs), filter_fn, kind,
                            max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir, self.praw)
 
         # reset stat tracking

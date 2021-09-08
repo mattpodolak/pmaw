@@ -7,8 +7,11 @@ from threading import Event
 import signal
 import time
 
+from praw.exceptions import RedditAPIException
+
 from pmaw.Cache import Cache
 from pmaw.utils.slices import timeslice, mapslice
+from pmaw.utils.filter import apply_filter
 from pmaw.Response import Response
 
 
@@ -18,7 +21,7 @@ log = logging.getLogger(__name__)
 class Request(object):
     """Request: Handles request information, response saving, and cache usage."""
 
-    def __init__(self, payload, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None):
+    def __init__(self, payload, filter_fn, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None):
         self.kind = kind
         self.max_ids_per_request = min(500, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
@@ -29,6 +32,15 @@ class Request(object):
         self.limit = payload.get('limit', None)
         self.exit = Event()
         self.praw = praw
+        self._filter = filter_fn
+
+        if safe_exit and self.payload.get('before', None) is None:
+            # warn the user not to use safe_exit without setting before,
+            # doing otherwise will make it impossible to resume without modifying 
+            # future query to use before value from first run
+            before = int(dt.datetime.now().timestamp())
+            payload['before'] = before
+            warnings.warn(f'Using safe_exit without setting before value is not recommended. Setting before to {before}')
 
         if self.praw is not None:
             if safe_exit:
@@ -72,7 +84,7 @@ class Request(object):
         try:
             getattr(signal, 'SIGHUP')
             sigs = ('TERM', 'HUP', 'INT')
-        except Exception:
+        except AttributeError:
             sigs = ('TERM', 'INT')
 
         for sig in sigs:
@@ -97,7 +109,7 @@ class Request(object):
             praw_data = [vars(obj) for obj in resp_gen]
             self.resp.responses.extend(praw_data)
             
-        except Exception as exc:
+        except RedditAPIException:
             self.enrich_list.extend(fullnames)
 
     def _idle_task(self, interval):
@@ -140,10 +152,16 @@ class Request(object):
         self.exit.set()
 
     def save_resp(self, results):
+        # dont filter results before updating limit: limit is the max number of results
+        # extracted from Pushshift, filtering can reduce the results < limit
         if self.kind == 'submission_comment_ids':
             self.limit -= 1
         else:
             self.limit -= len(results)
+
+        # apply user defined filter function before storing
+        if(self._filter is not None):
+            results = apply_filter(results, self._filter)
             
         if self.praw:
             # save fullnames of objects to be enriched with metadata by PRAW

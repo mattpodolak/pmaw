@@ -34,9 +34,9 @@ class PushshiftAPI(PushshiftAPIBase):
             Response generator object
         """
         kwargs['ids'] = ids
-        return self._search(kind='submission_comment_ids', **kwargs)
+        return self._search(filter_fn=None, kind='submission_comment_ids', **kwargs)
 
-    def search_comments(self, **kwargs):
+    def search_comments(self, filter_fn=None, **kwargs):
         """
         Method for searching comments, returns an array of comments
 
@@ -46,12 +46,13 @@ class PushshiftAPI(PushshiftAPIBase):
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             search_window (int, optional) - Size in days for search window for submissions / comments in non-id based search, defaults to 365
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
+            filter_fn (function, optional) - Function that filters results before saving them, accept a comment parameter, return False to filter the item, otherwise return True
         Output:
             Response generator object
         """
-        return self._search(kind='comment', **kwargs)
+        return self._search(filter_fn, kind='comment', **kwargs)
 
-    def search_submissions(self, **kwargs):
+    def search_submissions(self, filter_fn=None, **kwargs):
         """
         Method for searching submissions, returns an array of submissions
 
@@ -61,7 +62,8 @@ class PushshiftAPI(PushshiftAPIBase):
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             search_window (int, optional) - Size in days for search window for submissions / comments in non-id based search, defaults to 365
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
+            filter_fn (function, optional) - Function that filters results before saving them, accept a submission parameter, return False to filter the item, otherwise return True
         Output:
             Response generator object
         """
-        return self._search(kind='submission', **kwargs)
+        return self._search(filter_fn, kind='submission', **kwargs)
