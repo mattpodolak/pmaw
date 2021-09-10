@@ -34,6 +34,9 @@ class Request(object):
         self.praw = praw
         self._filter = filter_fn
 
+        if filter_fn and not callable(filter_fn):
+            raise Exception('filter_fn must be a callable function')
+
         if safe_exit and self.payload.get('before', None) is None:
             # warn the user not to use safe_exit without setting before,
             # doing otherwise will make it impossible to resume without modifying 
@@ -151,6 +154,13 @@ class Request(object):
     def _exit(self, signo, _frame):
         self.exit.set()
 
+    def _apply_filter(self, results):
+        # apply user defined filter function before storing
+        if(self._filter is not None):
+            return apply_filter(results, self._filter)
+        else:
+            return results    
+
     def save_resp(self, results):
         # dont filter results before updating limit: limit is the max number of results
         # extracted from Pushshift, filtering can reduce the results < limit
@@ -158,18 +168,16 @@ class Request(object):
             self.limit -= 1
         else:
             self.limit -= len(results)
-
-        # apply user defined filter function before storing
-        if(self._filter is not None):
-            results = apply_filter(results, self._filter)
             
         if self.praw:
             # save fullnames of objects to be enriched with metadata by PRAW
             if self.kind == 'submission_comment_ids':
                 self.enrich_list.extend([self.prefix+res for res in results])
             else:
+                results = self._apply_filter(results)
                 self.enrich_list.extend([self.prefix+res['id'] for res in results])
         else:
+            results = self._apply_filter(results)
             self.resp.responses.extend(results)
 
     def _add_nec_args(self, payload):
