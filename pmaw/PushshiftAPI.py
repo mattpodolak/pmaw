@@ -30,13 +30,16 @@ class PushshiftAPI(PushshiftAPIBase):
             max_ids_per_request (int, optional) - Maximum number of ids to use in a single request, defaults to 500, maximum 500.
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
+            cache_dir (str, optional) - An absolute or relative folder path to cache responses in when mem_safe or safe_exit is enabled
         Output:
             Response generator object
         """
         kwargs['ids'] = ids
-        return self._search(filter_fn=None, kind='submission_comment_ids', **kwargs)
+        if('filter_fn' in kwargs):
+            raise ValueError('filter_fn not supported for search_submission_comment_ids')
+        return self._search( kind='submission_comment_ids', **kwargs)
 
-    def search_comments(self, filter_fn=None, **kwargs):
+    def search_comments(self, **kwargs):
         """
         Method for searching comments, returns an array of comments
 
@@ -46,13 +49,14 @@ class PushshiftAPI(PushshiftAPIBase):
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             search_window (int, optional) - Size in days for search window for submissions / comments in non-id based search, defaults to 365
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
-            filter_fn (function, optional) - Function that filters results before saving them, accept a comment parameter, return False to filter the item, otherwise return True
+            filter_fn (function, optional) - A function used for custom filtering the results before saving them. Accepts a single comment parameter and returns False to filter out the item, otherwise returns True.
+            cache_dir (str, optional) - An absolute or relative folder path to cache responses in when mem_safe or safe_exit is enabled
         Output:
             Response generator object
         """
-        return self._search(filter_fn, kind='comment', **kwargs)
+        return self._search(kind='comment', **kwargs)
 
-    def search_submissions(self, filter_fn=None, **kwargs):
+    def search_submissions(self, **kwargs):
         """
         Method for searching submissions, returns an array of submissions
 
@@ -62,8 +66,9 @@ class PushshiftAPI(PushshiftAPIBase):
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             search_window (int, optional) - Size in days for search window for submissions / comments in non-id based search, defaults to 365
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
-            filter_fn (function, optional) - Function that filters results before saving them, accept a submission parameter, return False to filter the item, otherwise return True
+            filter_fn (function, optional) - A function used for custom filtering the results before saving them. Accepts a single submission parameter and returns False to filter out the item, otherwise returns True.
+            cache_dir (str, optional) - An absolute or relative folder path to cache responses in when mem_safe or safe_exit is enabled
         Output:
             Response generator object
         """
-        return self._search(filter_fn, kind='submission', **kwargs)
+        return self._search(kind='submission', **kwargs)

@@ -206,7 +206,6 @@ class PushshiftAPIBase(object):
         self.num_batches = 0
 
     def _search(self,
-                filter_fn,
                 kind,
                 max_ids_per_request=500,
                 max_results_per_request=100,
@@ -215,6 +214,7 @@ class PushshiftAPIBase(object):
                 dataset='reddit',
                 safe_exit=False,
                 cache_dir=None,
+                filter_fn=None,
                 **kwargs):
 
         # raise error if aggs are requested

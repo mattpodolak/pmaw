@@ -34,8 +34,8 @@ class Request(object):
         self.praw = praw
         self._filter = filter_fn
 
-        if filter_fn and not callable(filter_fn):
-            raise Exception('filter_fn must be a callable function')
+        if filter_fn is not None and not callable(filter_fn):
+            raise ValueError('filter_fn must be a callable function')
 
         if safe_exit and self.payload.get('before', None) is None:
             # warn the user not to use safe_exit without setting before,
@@ -110,7 +110,8 @@ class Request(object):
             # TODO: may need to change praw usage based on multithread performance
             resp_gen = self.praw.info(fullnames=fullnames)
             praw_data = [vars(obj) for obj in resp_gen]
-            self.resp.responses.extend(praw_data)
+            results = self._apply_filter(praw_data)
+            self.resp.responses.extend(results)
             
         except RedditAPIException:
             self.enrich_list.extend(fullnames)
@@ -174,7 +175,6 @@ class Request(object):
             if self.kind == 'submission_comment_ids':
                 self.enrich_list.extend([self.prefix+res for res in results])
             else:
-                results = self._apply_filter(results)
                 self.enrich_list.extend([self.prefix+res['id'] for res in results])
         else:
             results = self._apply_filter(results)

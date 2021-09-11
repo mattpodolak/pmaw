@@ -11,12 +11,18 @@
 - [Description](#description)
 - [Getting Started](#getting-started)
 - [Features](#features)
+  - [Multithreading](#multithreading)
+  - [Rate Limiting](#rate-limiting)
+  - [PRAW Enrichment](#praw-enrichment)
+  - [Custom Filtering](#custom-filtering)
+  - [Unsupported Parameters](#unsupported-parameters)
 - [Parameters](#parameters)
 - [Examples](#examples)
   - [Comments](#comments)
   - [Submissions](#submissions)
 - [Advanced Examples](#advanced-examples)
-  - [PRAW Enrichment](#praw-enrichment)
+  - [PRAW](#praw)
+  - [Custom Filter](#custom-filter)
   - [Memory Safety](#memory-safety)
   - [Safe Exiting](#safe-exiting)
 - [Benchmarks](#benchmarks)
@@ -115,6 +121,16 @@ A `before` value is required to load previous responses / requests when using no
 
 Similarly to the memory safety feature, a `Response` generator object is returned. When iterating through the responses using this generator, responses from the cache will be loaded in 1 cache file at a time.
 
+## PRAW Enrichment
+
+Enrich results with the most recent metadata from Reddit by passing a PRAW Reddit instance when instantiating the PushshiftAPI. Results not found on Reddit will not be enriched or returned.
+
+If you don’t already have a client ID and client secret, follow Reddit’s [First Steps Guide](https://github.com/reddit-archive/reddit/wiki/OAuth2-Quick-Start-Example#first-steps) to create them. A user agent is a unique identifier that helps Reddit determine the source of network requests. To use Reddit’s API, you need a unique and descriptive user agent.
+
+## Custom Filtering
+
+A user-defined function can be provided using the `filter_fn` parameter for either the `search_submissions` or `search_comments` method. This function will be used to filter results before they are saved by passing each item to the function and filtering it out if a `False` value is returned, saving the value if `True` is returned. The `limit` parameter does not take into account any results that are filtered out.
+
 ## Unsupported Parameters
 
 - `sort='asc'` is unsupported as it can have unexpected results
@@ -156,6 +172,8 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 - `mem_safe` (boolean, optional): If True, stores responses in cache during operation, defaults to False
 - `search_window` (int, optional): Size in days for search window for submissions / comments in non-id based search, defaults to 365
 - `safe_exit` (boolean, optional): If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
+- `cache_dir` (str, optional) - An absolute or relative folder path to cache responses in when `mem_safe` or `safe_exit` is enabled
+- `filter_fn` (function, optional) - A function used for custom filtering the results before saving them. Accepts a single comment or submission parameter and returns False to filter out the item, otherwise returns True.
 
 ### Keyword Arguments
 
@@ -169,6 +187,7 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 - `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 500, maximum 500.
 - `mem_safe` (boolean, optional): If True, stores responses in cache during operation, defaults to False
 - `safe_exit` (boolean, optional): If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
+- `cache_dir` (str, optional) - An absolute or relative folder path to cache responses in when `mem_safe` or `safe_exit` is enabled
 
 ### Keyword Arguments
 
@@ -252,11 +271,7 @@ You can supply a single submission by passing the id as a string or an array wit
 
 # Advanced Examples
 
-## PRAW Enrichment
-
-Enrich results with the most recent metadata from Reddit by passing a PRAW Reddit instance when instantiating the PushshiftAPI.
-
-If you don’t already have a client ID and client secret, follow Reddit’s [First Steps Guide](https://github.com/reddit-archive/reddit/wiki/OAuth2-Quick-Start-Example#first-steps) to create them. A user agent is a unique identifier that helps Reddit determine the source of network requests. To use Reddit’s API, you need a unique and descriptive user agent.
+## PRAW
 
 ```python
 import praw
@@ -270,6 +285,19 @@ reddit = praw.Reddit(
 
 api_praw = PushshiftAPI(praw=reddit)
 comments = api_praw.search_comments(q="quantum", subreddit="science", limit=100, before=1629990795)
+```
+
+## Custom Filter
+
+The user defined function must accept a single item (comment / submission) and return either True or False, returning False will filter out the item passed to it.
+
+```python
+from pmaw import PushshiftAPI
+
+api = PushshiftAPI()
+def fxn(item):
+  return item['score'] > 2
+posts = api.search_submissions(ids=post_ids, filter_fn=fxn)
 ```
 
 ## Memory Safety
