@@ -1,5 +1,5 @@
-import time
 import requests
+from requests import HTTPError
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import copy
@@ -16,7 +16,7 @@ class PushshiftAPIBase(object):
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
-                 checkpoint=10, file_checkpoint=20):
+                 checkpoint=10, file_checkpoint=20, praw=None):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -24,6 +24,7 @@ class PushshiftAPIBase(object):
         self.resp_dict = {}
         self.checkpoint = checkpoint
         self.file_checkpoint = file_checkpoint
+        self.praw = praw
 
         if batch_size:
             self.batch_size = batch_size
@@ -42,7 +43,7 @@ class PushshiftAPIBase(object):
     def _impose_rate_limit(self):
         interval = self._rate_limit.delay()
         if interval > 0:
-            time.sleep(interval)
+            self.req._idle_task(interval)
 
     def _get(self, url, payload={}):
         self._impose_rate_limit()
@@ -69,7 +70,7 @@ class PushshiftAPIBase(object):
 
             return r['data']
         else:
-            raise Exception(f"HTTP {status} - {reason}")
+            raise HTTPError(f"HTTP {status} - {reason}")
 
     @property
     def shards_are_down(self):
@@ -79,48 +80,48 @@ class PushshiftAPIBase(object):
         return shards['successful'] != shards['total']
 
     def _multithread(self, check_total=False):
-        executor = ThreadPoolExecutor(max_workers=self.num_workers)
+        with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
 
-        while len(self.req.req_list) > 0 and not self.req.exit.is_set():
-            # reset resp_dict which tracks remaining responses for timeslices
-            self.resp_dict = {}
+            while len(self.req.req_list) > 0 and not self.req.exit.is_set():
+                # reset resp_dict which tracks remaining responses for timeslices
+                self.resp_dict = {}
 
-            # set number of futures created to batch size
-            reqs = []
-            if check_total:
-                reqs.append(self.req.req_list.popleft())
-            else:
-                for i in range(min(len(self.req.req_list), self.batch_size)):
+                # set number of futures created to batch size
+                reqs = []
+                if check_total:
                     reqs.append(self.req.req_list.popleft())
+                else:
+                    for i in range(min(len(self.req.req_list), self.batch_size)):
+                        reqs.append(self.req.req_list.popleft())
 
-            futures = {executor.submit(
-                self._get, url_pay[0], url_pay[1]): url_pay for url_pay in reqs}
+                futures = {executor.submit(
+                    self._get, url_pay[0], url_pay[1]): url_pay for url_pay in reqs}
 
-            self._futures_handler(futures, check_total)
+                self._futures_handler(futures, check_total)
 
-            # reset attempts if no failures
-            self._rate_limit._check_fail()
+                # reset attempts if no failures
+                self._rate_limit._check_fail()
 
-            # check if shards are down
-            if self.shards_are_down and (self.shards_down_behavior is not None):
-                shards_down_message = "Not all PushShift shards are active. Query results may be incomplete."
-                if self.shards_down_behavior == 'warn':
-                    log.warning(shards_down_message)
-                if self.shards_down_behavior == 'stop':
-                    self._shutdown(executor)
-                    raise RuntimeError(
-                        shards_down_message + f' {len(self.req.req_list)} unfinished requests.')
+                # check if shards are down
+                if self.shards_are_down and (self.shards_down_behavior is not None):
+                    shards_down_message = "Not all PushShift shards are active. Query results may be incomplete."
+                    if self.shards_down_behavior == 'warn':
+                        log.warning(shards_down_message)
+                    if self.shards_down_behavior == 'stop':
+                        self._shutdown(executor)
+                        raise RuntimeError(
+                            shards_down_message + f' {len(self.req.req_list)} unfinished requests.')
+                if not check_total:
+                    self.num_batches += 1
+                    if self.num_batches % self.file_checkpoint == 0:
+                        # cache current results
+                        executor.submit(self.req.save_cache())
+                    self._print_stats('Checkpoint')
+                else:
+                    break
             if not check_total:
-                self.num_batches += 1
-                if self.num_batches % self.file_checkpoint == 0:
-                    # cache current results
-                    executor.submit(self.req.save_cache())
-                self._print_stats('Checkpoint')
-            else:
-                break
-        if not check_total:
-            self._print_stats('Total')
-        self._shutdown(executor)
+                self._print_stats('Total')
+            self._shutdown(executor)
 
     def _futures_handler(self, futures, check_total):
         for future in as_completed(futures):
@@ -169,7 +170,7 @@ class PushshiftAPIBase(object):
                             # generate payloads
                             self.req.gen_slices(
                                 url, payload, after, before, num)
-            except Exception as exc:
+            except HTTPError as exc:
                 log.debug(f"Request Failed -- {exc}")
                 self._rate_limit._req_fail()
                 self.req.req_list.appendleft(url_pay)
@@ -177,8 +178,9 @@ class PushshiftAPIBase(object):
     def _shutdown(self, exc, wait=False, cancel_futures=True):
         # shutdown executor
         try:
+            # pass cancel_futures keywords avail in python 3.9
             exc.shutdown(wait=wait, cancel_futures=cancel_futures)
-        except Exception:
+        except TypeError:
             # TODO: manually cancel pending futures
             exc.shutdown(wait=wait)
 
@@ -193,6 +195,10 @@ class PushshiftAPIBase(object):
                 remaining = 0  # don't print a neg number
             print(
                 f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
+            if(self.req.praw and len(self.req.enrich_list) > 0):
+                # let the user know praw enrichment is still in progress so it doesnt appear to hang after
+                # finishing retrieval from Pushshift
+                print(f'Finishing enrichment for {len(self.req.enrich_list)} items')
 
     def _reset(self):
         self.num_suc = 0
@@ -201,13 +207,14 @@ class PushshiftAPIBase(object):
 
     def _search(self,
                 kind,
-                max_ids_per_request=1000,
+                max_ids_per_request=500,
                 max_results_per_request=100,
                 mem_safe=False,
                 search_window=365,
                 dataset='reddit',
                 safe_exit=False,
                 cache_dir=None,
+                filter_fn=None,
                 **kwargs):
 
         # raise error if aggs are requested
@@ -216,8 +223,9 @@ class PushshiftAPIBase(object):
             raise NotImplementedError(err_msg.format(kwargs['aggs']))
 
         self.metadata_ = {}
-        self.req = Request(copy.deepcopy(kwargs), kind,
-                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=cache_dir)
+        self.resp_dict = {}
+        self.req = Request(copy.deepcopy(kwargs), filter_fn, kind,
+                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir, self.praw)
 
         # reset stat tracking
         self._reset()

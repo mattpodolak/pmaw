@@ -22,10 +22,7 @@ class Cache(object):
 
         # create cache folder
         self.folder = str(cache_dir) if cache_dir else "./cache"
-        try:
-            Path(self.folder).mkdir(exist_ok=True, parents=True)
-        except Exception as exc:
-            log.debug(f'Folder creation failed - {exc}')
+        Path(self.folder).mkdir(exist_ok=True, parents=True)
 
         self.response_cache = []
         self.size = 0
@@ -51,7 +48,7 @@ class Cache(object):
         try:
             with gzip.open(f'{self.folder}/{self.key}_info.pickle.gz', 'rb') as handle:
                 return pickle.load(handle)
-        except Exception:
+        except FileNotFoundError:
             log.info('No previous requests to load')
 
     def load_resp(self, cache_num):
@@ -59,7 +56,7 @@ class Cache(object):
         try:
             with gzip.open(f'{self.folder}/{filename}', 'rb') as handle:
                 return pickle.load(handle)
-        except Exception as exc:
+        except FileNotFoundError as exc:
             warnings.warn(f'Failed to load responses from {filename} - {exc}')
 
     def save_info(self, **kwargs):

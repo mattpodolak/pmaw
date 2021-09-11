@@ -1,0 +1,83 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://api.pushshift.io/reddit/comment/search?ids=gjacwx5,gjad2l6,gjadatw,gjadc7w,gjadcwh,gjadgd7,gjadlbc,gjadnoc,gjadog1,gjadphb
+  response:
+    body:
+      string: !!binary |
+        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
+        xxdf/wRFqEIVX0MAAA==
+    headers:
+      CF-Cache-Status:
+      - MISS
+      CF-RAY:
+      - 68a9bdd89b0d5431-YYZ
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 06 Sep 2021 18:25:45 GMT
+      Expect-CT:
+      - max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+      Last-Modified:
+      - Mon, 06 Sep 2021 18:25:45 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=9GmsIAcKsg2YkkvprDUgzc38MdrQcugGbBdBZwJX7quTodBfuSczsx%2FH1tWXAiol%2F8HfsnJ6MDnl92ZMC1JZy%2Ffns8Fr1cfYpDL3ZDJNHdqPiva6HlIUqCgNeY52fgKGy9Mx"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      access-control-allow-origin:
+      - '*'
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400, h3-28=":443"; ma=86400, h3-27=":443";
+        ma=86400
+      cache-control:
+      - public, max-age=1, s-maxage=1
+    status:
+      code: 200
+      message: OK
+version: 1

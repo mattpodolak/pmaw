@@ -1,5 +1,7 @@
 <h2 align="center">PMAW: Pushshift Multithread API Wrapper</h2>
 
+[![CircleCI](https://circleci.com/gh/mattpodolak/pmaw.svg?style=shield)](https://circleci.com/gh/mattpodolak/pmaw)
+[![codecov.io](https://codecov.io/github/mattpodolak/pmaw/coverage.svg?branch=master)](https://codecov.io/github/mattpodolak/pmaw)
 [![PyPI Version](https://img.shields.io/pypi/v/pmaw?color=blue)](https://pypi.org/project/pmaw/)
 [![Python Version](https://img.shields.io/pypi/pyversions/pmaw?color=blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -9,15 +11,26 @@
 - [Description](#description)
 - [Getting Started](#getting-started)
 - [Features](#features)
+  - [Multithreading](#multithreading)
+  - [Rate Limiting](#rate-limiting)
+  - [PRAW Enrichment](#praw-enrichment)
+  - [Custom Filtering](#custom-filtering)
+  - [Unsupported Parameters](#unsupported-parameters)
 - [Parameters](#parameters)
 - [Examples](#examples)
+  - [Comments](#comments)
+  - [Submissions](#submissions)
 - [Advanced Examples](#advanced-examples)
+  - [PRAW](#praw)
+  - [Custom Filter](#custom-filter)
+  - [Memory Safety](#memory-safety)
+  - [Safe Exiting](#safe-exiting)
 - [Benchmarks](#benchmarks)
 - [Deprecated Examples](#deprecated-examples)
 
 # Description
 
-**PMAW** is an ultra minimalist wrapper for the Pushshift API which uses multithreading to retrieve Reddit comments and submissions. General usage is through the `PushshiftAPI` class which provides methods for interacting with different `Pushshift` endpoints, please view the [Pushshift Docs](https://github.com/pushshift/api) for more details on the endpoints and accepted parameters. Parameters are provided through keyword arguments when calling the method, some methods will have required parameters. When using a method **PMAW** will complete all the required API calls to complete the query before returning a `Response` generator object.
+**PMAW** is a wrapper for the Pushshift API which uses multithreading to retrieve Reddit comments and submissions. General usage is through the `PushshiftAPI` class which provides methods for interacting with different `Pushshift` endpoints, please view the [Pushshift Docs](https://github.com/pushshift/api) for more details on the endpoints and accepted parameters. Parameters are provided through keyword arguments when calling the method, some methods will have required parameters. When using a method **PMAW** will complete all the required API calls to complete the query before returning a `Response` generator object.
 
 The following three methods are currently supported:
 
@@ -108,6 +121,16 @@ A `before` value is required to load previous responses / requests when using no
 
 Similarly to the memory safety feature, a `Response` generator object is returned. When iterating through the responses using this generator, responses from the cache will be loaded in 1 cache file at a time.
 
+## PRAW Enrichment
+
+Enrich results with the most recent metadata from Reddit by passing a PRAW Reddit instance when instantiating the PushshiftAPI. Results not found on Reddit will not be enriched or returned.
+
+If you don’t already have a client ID and client secret, follow Reddit’s [First Steps Guide](https://github.com/reddit-archive/reddit/wiki/OAuth2-Quick-Start-Example#first-steps) to create them. A user agent is a unique identifier that helps Reddit determine the source of network requests. To use Reddit’s API, you need a unique and descriptive user agent.
+
+## Custom Filtering
+
+A user-defined function can be provided using the `filter_fn` parameter for either the `search_submissions` or `search_comments` method. This function will be used to filter results before they are saved by passing each item to the function and filtering it out if a `False` value is returned, saving the value if `True` is returned. The `limit` parameter does not take into account any results that are filtered out.
+
 ## Unsupported Parameters
 
 - `sort='asc'` is unsupported as it can have unexpected results
@@ -134,6 +157,7 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 - `jitter` (str, optional): Jitter to use with backoff, options are None, 'full', 'equal', 'decorr'. Defaults to None.
 - `checkpoint` (int, optional): Size of interval in batches to print a checkpoint with stats, defaults to 10
 - `file_checkpoint` (int, optional) - Size of interval in batches to cache responses when using mem_safe, defaults to 20
+- `praw` (praw.Reddit, optional) - Used to enrich the Pushshift items retrieved with metadata directly from Reddit
 
 ### `Response`
 
@@ -143,11 +167,13 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 
 ## `search_submissions` and `search_comments`
 
-- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 1000, maximum 1000.
+- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 500, maximum 500.
 - `max_results_per_request` (int, optional): Maximum number of items to return in a single non-id based request, defaults to 100, maximum 100.
 - `mem_safe` (boolean, optional): If True, stores responses in cache during operation, defaults to False
 - `search_window` (int, optional): Size in days for search window for submissions / comments in non-id based search, defaults to 365
 - `safe_exit` (boolean, optional): If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
+- `cache_dir` (str, optional) - An absolute or relative folder path to cache responses in when `mem_safe` or `safe_exit` is enabled
+- `filter_fn` (function, optional) - A function used for custom filtering the results before saving them. Accepts a single comment or submission parameter and returns False to filter out the item, otherwise returns True.
 
 ### Keyword Arguments
 
@@ -158,9 +184,10 @@ Similarly to the memory safety feature, a `Response` generator object is returne
 ## `search_submission_comment_ids`
 
 - `ids` is a required parameter and should be an array of submission ids, a single id can be passed as a string
-- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 1000, maximum 1000.
+- `max_ids_per_request` (int, optional): Maximum number of ids to use in a single request, defaults to 500, maximum 500.
 - `mem_safe` (boolean, optional): If True, stores responses in cache during operation, defaults to False
 - `safe_exit` (boolean, optional): If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
+- `cache_dir` (str, optional) - An absolute or relative folder path to cache responses in when `mem_safe` or `safe_exit` is enabled
 
 ### Keyword Arguments
 
@@ -175,6 +202,8 @@ The following examples are for `pmaw` version >= 1.0.0.
 ### Search Comments
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 comments = api.search_comments(subreddit="science", limit=1000)
 comment_list = [comment for comment in comments]
@@ -183,6 +212,8 @@ comment_list = [comment for comment in comments]
 ### Search Comments by IDs
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 comment_ids = ['gjacwx5','gjad2l6','gjadatw','gjadc7w','gjadcwh',
   'gjadgd7','gjadlbc','gjadnoc','gjadog1','gjadphb']
@@ -197,6 +228,8 @@ You can supply a single comment by passing the id as a string or an array with a
 ### Search Comment IDs by Submission ID
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 post_ids = ['kxi2w8','kxi2g1','kxhzrl','kxhyh6','kxhwh0',
   'kxhv53','kxhm7b','kxhm3s','kxhg37','kxhak9']
@@ -213,6 +246,8 @@ You can supply a single submission by passing the id as a string or an array wit
 ### Search Submissions
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 posts = api.search_submissions(subreddit="science", limit=1000)
 post_list = [post for post in posts]
@@ -221,6 +256,8 @@ post_list = [post for post in posts]
 ### Search Submissions by IDs
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 post_ids = ['kxi2w8','kxi2g1','kxhzrl','kxhyh6','kxhwh0',
   'kxhv53','kxhm7b','kxhm3s','kxhg37','kxhak9']
@@ -234,11 +271,42 @@ You can supply a single submission by passing the id as a string or an array wit
 
 # Advanced Examples
 
+## PRAW
+
+```python
+import praw
+from pmaw import PushshiftAPI
+
+reddit = praw.Reddit(
+ client_id='YOUR_CLIENT_ID',
+ client_secret='YOUR_CLIENT_SECRET',
+ user_agent=f'python: PMAW request enrichment (by u/YOUR_USERNAME)'
+)
+
+api_praw = PushshiftAPI(praw=reddit)
+comments = api_praw.search_comments(q="quantum", subreddit="science", limit=100, before=1629990795)
+```
+
+## Custom Filter
+
+The user defined function must accept a single item (comment / submission) and return either True or False, returning False will filter out the item passed to it.
+
+```python
+from pmaw import PushshiftAPI
+
+api = PushshiftAPI()
+def fxn(item):
+  return item['score'] > 2
+posts = api.search_submissions(ids=post_ids, filter_fn=fxn)
+```
+
 ## Memory Safety
 
 If you are pulling large amounts of data or have a limited amount of RAM, using the memory safety feature will help you avoid an out of memory error from being thrown during data retrieval.
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 posts = api.search_submissions(subreddit="science", limit=700000, mem_safe=True)
 print(f'{len(posts)} posts retrieved from Pushshift')
@@ -263,6 +331,8 @@ api = PushshiftAPI(file_checkpoint=10)
 If you expect that your query may be interrupted while its running, setting `safe_exit=True` will cache responses and unfinished requests before exiting when an interrupt signal is received. Re-running a `search` method with the exact same parameters that you have ran before will load previous responses and any unfinished requests from the cache, allowing it to resume if all the required responses have not yet been retrieved.
 
 ```python
+from pmaw import PushshiftAPI
+
 api = PushshiftAPI()
 posts = api.search_submissions(subreddit="science", limit=700000, before=1613234822, safe_exit=True)
 print(f'{len(posts)} posts retrieved from Pushshift')
