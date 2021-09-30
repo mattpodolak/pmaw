@@ -13,11 +13,15 @@ log = logging.getLogger(__name__)
 class Cache(object):
     """Cache: Handle storing and loading request info and responses in the cache"""
 
-    def __init__(self, payload, safe_exit, cache_dir=None):
-        # generating key
-        key_str = json.dumps(payload, sort_keys=True).encode("utf-8")
-        self.key = hashlib.md5(key_str).hexdigest()
-        log.info(f'Response cache key: {self.key}')
+    def __init__(self, payload, safe_exit, cache_dir=None, key=None):
+
+        if key is None:
+            # generating key
+            key_str = json.dumps(payload, sort_keys=True).encode("utf-8")
+            self.key = hashlib.md5(key_str).hexdigest()
+            log.info(f'Response cache key: {self.key}')
+        else:
+            self.key = key
 
         # create cache folder
         self.folder = str(cache_dir) if cache_dir else "./cache"
@@ -27,6 +31,10 @@ class Cache(object):
         self.size = 0
         if safe_exit:
             self.check_cache()
+    
+    @staticmethod
+    def load_with_key(key, cache_dir=None):
+        return Cache({}, True, cache_dir, key)
 
     def cache_responses(self, responses):
         if responses:

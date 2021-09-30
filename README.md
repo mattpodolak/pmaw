@@ -13,6 +13,7 @@
 - [Features](#features)
   - [Multithreading](#multithreading)
   - [Rate Limiting](#rate-limiting)
+  - [Caching](#caching)
   - [PRAW Enrichment](#praw-enrichment)
   - [Custom Filtering](#custom-filtering)
   - [Unsupported Parameters](#unsupported-parameters)
@@ -23,8 +24,7 @@
 - [Advanced Examples](#advanced-examples)
   - [PRAW](#praw)
   - [Custom Filter](#custom-filter)
-  - [Memory Safety](#memory-safety)
-  - [Safe Exiting](#safe-exiting)
+  - [Caching Examples](#caching-examples)
 - [Benchmarks](#benchmarks)
 - [Deprecated Examples](#deprecated-examples)
 
@@ -103,7 +103,8 @@ Introducing an element of randomness called `jitter` allows us to reduce the com
 - `equal` jitter selects the length of sleep for a request by adding half the capped exponential backoff value to a random sample from a normal distribution between 0 and half the capped exponential backoff value.
 - `decorr` - decorrelated jitter is similar to `full` jitter but increases the maximum jitter based on the last random value, selecting the length of sleep by the minimum value between `max_sleep` and a random sample between the `base_backoff` and the last sleep value multiplied by 3.
 
-## Memory Safety
+## Caching
+### Memory Safety
 
 Memory safety allows us to reduce the amount of RAM used when requesting data, and can be enabled by setting `mem_safe=True` on a search method. This feature should be used if a large amount of data is being requested or if the machine in use has a limited amount of RAM.
 
@@ -111,7 +112,7 @@ When enabled, **PMAW** caches the responses retrieved every 20 batches (approx 2
 
 When the search is complete, a `Response` generator object is returned, when iterating through the responses using this generator, responses from the cache will be loaded in 1 cache file at a time.
 
-## Safe Exiting
+### Safe Exiting
 
 Safe exiting will ensure that if a search method is interrupted that any unfinished requests and current responses are cached before exiting. If the search method successfully completes, all the responses are also cached. This can be enabled by setting `safe_exit=True` on a search method.
 
@@ -165,6 +166,7 @@ A user-defined function can be provided using the `filter_fn` parameter for eith
 `Response` is a generator object which will return the responses once when iterated over.
 
 - `len(Response)` will return the number of responses that were retrieved from Pushshift
+- `load_cache(key, cache_dir=None)` returns an instance of `Response` with the responses loaded with the provided key
 
 ## `search_submissions` and `search_comments`
 
@@ -301,7 +303,9 @@ def fxn(item):
 posts = api.search_submissions(ids=post_ids, filter_fn=fxn)
 ```
 
-## Memory Safety
+## Caching Examples
+
+### Memory Safety
 
 If you are pulling large amounts of data or have a limited amount of RAM, using the memory safety feature will help you avoid an out of memory error from being thrown during data retrieval.
 
@@ -327,7 +331,7 @@ With default settings, responses are cached every 20 batches (approx 20,000 resp
 api = PushshiftAPI(file_checkpoint=10)
 ```
 
-## Safe Exiting
+### Safe Exiting
 
 If you expect that your query may be interrupted while its running, setting `safe_exit=True` will cache responses and unfinished requests before exiting when an interrupt signal is received. Re-running a `search` method with the exact same parameters that you have ran before will load previous responses and any unfinished requests from the cache, allowing it to resume if all the required responses have not yet been retrieved.
 
@@ -340,6 +344,20 @@ print(f'{len(posts)} posts retrieved from Pushshift')
 ```
 
 A `before` value is required to load previous responses / requests when using non-id search, as `before` is set to the current time when the `search` method is called, which would result in a different set of parameters then when you last ran the search despite all other parameters being the same.
+
+### Loading Cache with Key
+
+The `Response` class has a staticmethod `load_cache` that allows you to pass a `key` value and `cache_dir` to load responses from the cache into an instance of `Response`.
+
+```python
+from pmaw import Response
+
+cache_key = 'a904e22ea572a8c0109b7bc5330528e4'
+cache_dir = './cache'
+resp = Response.load_cache(cache_key, cache_dir)
+
+```
+
 
 # Benchmarks
 
