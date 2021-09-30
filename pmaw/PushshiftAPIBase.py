@@ -1,9 +1,11 @@
-import requests
-from requests import HTTPError
 import json
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import copy
 import logging
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import requests
+from requests import HTTPError
 
 from pmaw.RateLimit import RateLimit
 from pmaw.Request import Request
@@ -16,7 +18,7 @@ class PushshiftAPIBase(object):
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
-                 checkpoint=10, file_checkpoint=20, praw=None):
+                 checkpoint=10, file_checkpoint=20, praw=None, quiet_mode=False):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -25,6 +27,9 @@ class PushshiftAPIBase(object):
         self.checkpoint = checkpoint
         self.file_checkpoint = file_checkpoint
         self.praw = praw
+
+        log_level = logging.WARN if quiet_mode else logging.INFO
+        logging.basicConfig(level = log_level, stream=sys.stdout)
 
         if batch_size:
             self.batch_size = batch_size
@@ -193,12 +198,12 @@ class PushshiftAPIBase(object):
         elif prefix == 'Total':
             if remaining < 0:
                 remaining = 0  # don't print a neg number
-            print(
+            log.info(
                 f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
             if(self.req.praw and len(self.req.enrich_list) > 0):
                 # let the user know praw enrichment is still in progress so it doesnt appear to hang after
                 # finishing retrieval from Pushshift
-                print(f'Finishing enrichment for {len(self.req.enrich_list)} items')
+                log.info(f'Finishing enrichment for {len(self.req.enrich_list)} items')
 
     def _reset(self):
         self.num_suc = 0
@@ -246,10 +251,10 @@ class PushshiftAPIBase(object):
                 total_avail = self.metadata_.get('total_results', 0)
 
                 if self.req.limit is None:
-                    print(f'{total_avail} result(s) available in Pushshift')
+                    log.info(f'{total_avail} result(s) available in Pushshift')
                     self.req.limit = total_avail
                 elif (total_avail < self.req.limit):
-                    print(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
+                    log.info(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
                     self.req.limit = total_avail
 
             # generate payloads

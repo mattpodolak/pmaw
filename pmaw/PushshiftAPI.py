@@ -18,6 +18,7 @@ class PushshiftAPI(PushshiftAPIBase):
             checkpoint (int, optional) - Size of interval in batches to print a checkpoint with stats, defaults to 10
             file_checkpoint (int, optional) - Size of interval in batches to cache responses when using mem_safe, defaults to 20
             praw (praw.Reddit, optional) - Used to enrich the Pushshift items retrieved with metadata directly from Reddit
+            quiet_mode (bool, optional) - If true, only show set log level to WARN, defaults to INFO when False
         """
         super().__init__(*args, **kwargs)
 

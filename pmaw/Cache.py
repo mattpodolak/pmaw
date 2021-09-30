@@ -10,7 +10,6 @@ import gzip
 
 log = logging.getLogger(__name__)
 
-
 class Cache(object):
     """Cache: Handle storing and loading request info and responses in the cache"""
 
@@ -18,7 +17,7 @@ class Cache(object):
         # generating key
         key_str = json.dumps(payload, sort_keys=True).encode("utf-8")
         self.key = hashlib.md5(key_str).hexdigest()
-        print(f'Response cache key: {self.key}')
+        log.info(f'Response cache key: {self.key}')
 
         # create cache folder
         self.folder = str(cache_dir) if cache_dir else "./cache"
@@ -34,7 +33,7 @@ class Cache(object):
             num_resp = len(responses)
             checkpoint = len(self.response_cache) + 1
             self.size += num_resp
-            log.info(
+            log.debug(
                 f'File Checkpoint {checkpoint}:: Caching {num_resp} Responses')
 
             filename = f'{checkpoint}-{self.key}-{num_resp}.pickle.gz'
@@ -50,6 +49,7 @@ class Cache(object):
                 return pickle.load(handle)
         except FileNotFoundError:
             log.info('No previous requests to load')
+            return None
 
     def load_resp(self, cache_num):
         filename = self.response_cache[cache_num]
