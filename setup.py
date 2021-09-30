@@ -25,7 +25,7 @@ setuptools.setup(
     url="https://github.com/mattpodolak/pmaw",
     packages=setuptools.find_packages(),
     license='MIT License',
-    install_requires=['requests'],
+    install_requires=['requests', 'praw'],
     keywords='reddit api wrapper pushshift multithread data collection cache',
     classifiers=[
         "Development Status :: 3 - Alpha",
