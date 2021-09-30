@@ -1,3 +1,8 @@
+## 2.1.0 (2021/09/30)
+
+- Updated logging and added `quiet_mode`
+- Added `load_cache` static method to `Response` to load cached responses using cache key
+
 ## 2.0.0 (2021/09/11)
 
 - Added support for enriching result metadata using PRAW
