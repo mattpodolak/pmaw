@@ -1,6 +1,6 @@
-## 2.1.0 (2021/09/30)
+## 2.1.0 (2021/10/01)
 
-- Updated logging and added `quiet_mode`
+- Updated logging and set default log level to INFO
 - Added `load_cache` static method to `Response` to load cached responses using cache key
 
 ## 2.0.0 (2021/09/11)

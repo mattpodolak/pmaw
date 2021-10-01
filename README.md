@@ -104,6 +104,7 @@ Introducing an element of randomness called `jitter` allows us to reduce the com
 - `decorr` - decorrelated jitter is similar to `full` jitter but increases the maximum jitter based on the last random value, selecting the length of sleep by the minimum value between `max_sleep` and a random sample between the `base_backoff` and the last sleep value multiplied by 3.
 
 ## Caching
+
 ### Memory Safety
 
 Memory safety allows us to reduce the amount of RAM used when requesting data, and can be enabled by setting `mem_safe=True` on a search method. This feature should be used if a large amount of data is being requested or if the machine in use has a limited amount of RAM.
@@ -159,7 +160,6 @@ A user-defined function can be provided using the `filter_fn` parameter for eith
 - `checkpoint` (int, optional): Size of interval in batches to print a checkpoint with stats, defaults to 10
 - `file_checkpoint` (int, optional): Size of interval in batches to cache responses when using mem_safe, defaults to 20
 - `praw` (praw.Reddit, optional): Used to enrich the Pushshift items retrieved with metadata directly from Reddit
-- `quiet_mode` (bool, optional): If true, only show set log level to WARN, defaults to INFO when False
 
 ### `Response`
 
@@ -357,7 +357,6 @@ cache_dir = './cache'
 resp = Response.load_cache(cache_key, cache_dir)
 
 ```
-
 
 # Benchmarks
 

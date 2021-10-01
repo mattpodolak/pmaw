@@ -10,15 +10,15 @@ from requests import HTTPError
 from pmaw.RateLimit import RateLimit
 from pmaw.Request import Request
 
+logging.basicConfig(level = logging.INFO, stream=sys.stdout)
 log = logging.getLogger(__name__)
-
 
 class PushshiftAPIBase(object):
     _base_url = 'https://{domain}.pushshift.io/{{endpoint}}'
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
-                 checkpoint=10, file_checkpoint=20, praw=None, quiet_mode=False):
+                 checkpoint=10, file_checkpoint=20, praw=None):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -27,9 +27,6 @@ class PushshiftAPIBase(object):
         self.checkpoint = checkpoint
         self.file_checkpoint = file_checkpoint
         self.praw = praw
-
-        log_level = logging.WARN if quiet_mode else logging.INFO
-        logging.basicConfig(level = log_level, stream=sys.stdout)
 
         if batch_size:
             self.batch_size = batch_size
