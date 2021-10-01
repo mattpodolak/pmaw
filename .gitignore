@@ -7,6 +7,7 @@
 .env
 pytest.ini
 pytest.log
+htmlcov
 
 pmaw.code-workspace
 pmaw.egg-info
