@@ -1,15 +1,17 @@
-import requests
-from requests import HTTPError
 import json
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import copy
 import logging
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import requests
+from requests import HTTPError
 
 from pmaw.RateLimit import RateLimit
 from pmaw.Request import Request
 
+logging.basicConfig(level = logging.INFO, stream=sys.stdout)
 log = logging.getLogger(__name__)
-
 
 class PushshiftAPIBase(object):
     _base_url = 'https://{domain}.pushshift.io/{{endpoint}}'
@@ -193,12 +195,12 @@ class PushshiftAPIBase(object):
         elif prefix == 'Total':
             if remaining < 0:
                 remaining = 0  # don't print a neg number
-            print(
+            log.info(
                 f'{prefix}:: Success Rate: {rate:.2f}% - Requests: {self.num_req} - Batches: {self.num_batches} - Items Remaining: {remaining}')
             if(self.req.praw and len(self.req.enrich_list) > 0):
                 # let the user know praw enrichment is still in progress so it doesnt appear to hang after
                 # finishing retrieval from Pushshift
-                print(f'Finishing enrichment for {len(self.req.enrich_list)} items')
+                log.info(f'Finishing enrichment for {len(self.req.enrich_list)} items')
 
     def _reset(self):
         self.num_suc = 0
@@ -246,10 +248,10 @@ class PushshiftAPIBase(object):
                 total_avail = self.metadata_.get('total_results', 0)
 
                 if self.req.limit is None:
-                    print(f'{total_avail} result(s) available in Pushshift')
+                    log.info(f'{total_avail} result(s) available in Pushshift')
                     self.req.limit = total_avail
                 elif (total_avail < self.req.limit):
-                    print(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
+                    log.info(f'{self.req.limit - total_avail} result(s) not found in Pushshift')
                     self.req.limit = total_avail
 
             # generate payloads

@@ -71,7 +71,7 @@ class Request(object):
             self._cache = Cache(_tmp, safe_exit, cache_dir=cache_dir)
             if safe_exit:
                 info = self._cache.load_info()
-                if info:
+                if info is not None:
                     self.req_list.extend(info['req_list'])
                     self.payload = info['payload']
                     self.limit = info['limit']
