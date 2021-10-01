@@ -8,9 +8,9 @@ def test_safe_exit_praw():
     api_praw = PushshiftAPI(praw=reddit)
     comments = api_praw.search_comments(ids=comment_ids, safe_exit=True)
 
-@tape.use_cassette('test_submission_search_ids')
+@tape.use_cassette('test_comment_search_limit')
 def test_asc_sort():
   with pytest.raises(NotImplementedError):
     api = PushshiftAPI()
-    posts = api.search_submissions(ids=post_ids, sort='asc')
+    comments = api.search_comments(subreddit="science", limit=100, before=1629990795, sort='asc')
 
