@@ -1,3 +1,7 @@
+## 2.1.1 (2021/11/29)
+
+- fix index error bug
+
 ## 2.1.0 (2021/10/01)
 
 - Updated logging and set default log level to INFO
