@@ -167,7 +167,10 @@ class PushshiftAPIBase(object):
 
                         if num > 0:
                             # find minimum `created_utc` to set as the `before` parameter in next timeslices
-                            before = data[-1]['created_utc']
+                            if len(data) > 0:
+                                # make sure that index error wont occur
+                                # we want to slice using the payload['before'] if we dont get any results
+                                before = data[-1]['created_utc']
 
                             # generate payloads
                             self.req.gen_slices(
