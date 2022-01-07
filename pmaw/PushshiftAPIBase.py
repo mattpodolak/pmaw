@@ -167,14 +167,14 @@ class PushshiftAPIBase(object):
 
                         if num > 0:
                             # find minimum `created_utc` to set as the `before` parameter in next timeslices
+                            # Fix issue where Pushshift occasionally reports remaining results that it is
+                            # unable to return - len(data) == 0 when this happens                    
                             if len(data) > 0:
-                                # make sure that index error wont occur
-                                # we want to slice using the payload['before'] if we dont get any results
                                 before = data[-1]['created_utc']
+                                # generate payloads
+                                self.req.gen_slices(
+                                    url, payload, after, before, num)
 
-                            # generate payloads
-                            self.req.gen_slices(
-                                url, payload, after, before, num)
             except HTTPError as exc:
                 log.debug(f"Request Failed -- {exc}")
                 self._rate_limit._req_fail()
