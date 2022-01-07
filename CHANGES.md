@@ -1,3 +1,7 @@
+## 2.1.2 (2022/01/07)
+
+- fix scenario where a result is reported but cannot be returned by Pushshift
+
 ## 2.1.1 (2021/11/29)
 
 - fix index error bug
