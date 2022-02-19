@@ -10,7 +10,7 @@ import gzip
 
 log = logging.getLogger(__name__)
 
-class Cache(object):
+class Cache:
     """Cache: Handle storing and loading request info and responses in the cache"""
 
     def __init__(self, payload, safe_exit, cache_dir=None, key=None):
