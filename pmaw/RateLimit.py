@@ -5,7 +5,7 @@ import random
 log = logging.getLogger(__name__)
 
 
-class RateLimit(object):
+class RateLimit:
     """RateLimit: Implements different rate-limiting strategies for concurrent requests"""
 
     def __init__(self, rate_limit=60, base_backoff=0.5, limit_type='average', max_sleep=60, jitter=None):

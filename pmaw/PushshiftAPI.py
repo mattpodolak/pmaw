@@ -1,5 +1,6 @@
 from pmaw.PushshiftAPIBase import PushshiftAPIBase
 
+
 class PushshiftAPI(PushshiftAPIBase):
     def __init__(self, *args, **kwargs):
         """

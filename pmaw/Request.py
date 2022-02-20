@@ -18,7 +18,7 @@ from pmaw.Response import Response
 log = logging.getLogger(__name__)
 
 
-class Request(object):
+class Request:
     """Request: Handles request information, response saving, and cache usage."""
 
     def __init__(self, payload, filter_fn, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None):

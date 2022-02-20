@@ -10,10 +10,11 @@ from requests import HTTPError
 from pmaw.RateLimit import RateLimit
 from pmaw.Request import Request
 
-logging.basicConfig(level = logging.INFO, stream=sys.stdout)
+
 log = logging.getLogger(__name__)
 
-class PushshiftAPIBase(object):
+
+class PushshiftAPIBase:
     _base_url = 'https://{domain}.pushshift.io/{{endpoint}}'
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
