@@ -1,3 +1,8 @@
+## 2.1.3 (2022/02/20)
+
+- Don't inherit from object in classes
+- Removed logging configuration to prevent unexpected results for users
+
 ## 2.1.2 (2022/01/07)
 
 - fix scenario where a result is reported but cannot be returned by Pushshift
