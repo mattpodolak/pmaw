@@ -19,6 +19,8 @@ class PushshiftAPI(PushshiftAPIBase):
             checkpoint (int, optional) - Size of interval in batches to print a checkpoint with stats, defaults to 10
             file_checkpoint (int, optional) - Size of interval in batches to cache responses when using mem_safe, defaults to 20
             praw (praw.Reddit, optional) - Used to enrich the Pushshift items retrieved with metadata directly from Reddit
+            sort_var (str, optional) - parameter, used in Pushshift API, to sort values
+            check_totals (bool, optional) - if to check total counts before returning results. API stopped returning total counts as of 2022-12-17
         """
         super().__init__(*args, **kwargs)
 
@@ -32,6 +34,8 @@ class PushshiftAPI(PushshiftAPIBase):
             mem_safe (boolean, optional) - If True, stores responses in cache during operation, defaults to False
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
             cache_dir (str, optional) - An absolute or relative folder path to cache responses in when mem_safe or safe_exit is enabled
+            sort_var (str, optional) - parameter, used in Pushshift API, to sort values
+            check_totals (bool, optional) - if to check total counts before returning results. API stopped returning total counts as of 2022-12-17
         Output:
             Response generator object
         """
@@ -52,6 +56,8 @@ class PushshiftAPI(PushshiftAPIBase):
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
             filter_fn (function, optional) - A function used for custom filtering the results before saving them. Accepts a single comment parameter and returns False to filter out the item, otherwise returns True.
             cache_dir (str, optional) - An absolute or relative folder path to cache responses in when mem_safe or safe_exit is enabled
+            sort_var (str, optional) - parameter, used in Pushshift API, to sort values
+            check_totals (bool, optional) - if to check total counts before returning results. API stopped returning total counts as of 2022-12-17
         Output:
             Response generator object
         """
@@ -69,6 +75,8 @@ class PushshiftAPI(PushshiftAPIBase):
             safe_exit (boolean, optional) - If True, will safely exit if interrupted by storing current responses and requests in the cache. Will also load previous requests / responses if found in cache, defaults to False
             filter_fn (function, optional) - A function used for custom filtering the results before saving them. Accepts a single submission parameter and returns False to filter out the item, otherwise returns True.
             cache_dir (str, optional) - An absolute or relative folder path to cache responses in when mem_safe or safe_exit is enabled
+            sort_var (str, optional) - parameter, used in Pushshift API, to sort values
+            check_totals (bool, optional) - if to check total counts before returning results. API stopped returning total counts as of 2022-12-17
         Output:
             Response generator object
         """

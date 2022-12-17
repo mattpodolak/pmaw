@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 class Request:
     """Request: Handles request information, response saving, and cache usage."""
 
-    def __init__(self, payload, filter_fn, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None):
+    def __init__(self, payload, filter_fn, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None, sort_var='sort'):
         self.kind = kind
         self.max_ids_per_request = min(500, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
@@ -32,7 +32,9 @@ class Request:
         self.limit = payload.get('limit', None)
         self.exit = Event()
         self.praw = praw
+        self.sort_var = sort_var
         self._filter = filter_fn
+
 
         if filter_fn is not None and not callable(filter_fn):
             raise ValueError('filter_fn must be a callable function')
@@ -185,9 +187,9 @@ class Request:
 
         payload['size'] = self.max_results_per_request
 
-        if 'sort' not in payload:
-            payload['sort'] = 'desc'
-        elif payload.get('sort') != 'desc':
+        if self.sort_var not in payload:
+            payload[self.sort_var] = 'desc'
+        elif payload.get(self.sort_var) != 'desc':
             err_msg = "Support for non-default sort has not been implemented as it may cause unexpected results"
             raise NotImplementedError(err_msg)
 

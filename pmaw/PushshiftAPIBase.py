@@ -19,7 +19,7 @@ class PushshiftAPIBase:
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
-                 checkpoint=10, file_checkpoint=20, praw=None):
+                 checkpoint=10, file_checkpoint=20, praw=None, check_totals=True, sort_var='sort'):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -28,6 +28,8 @@ class PushshiftAPIBase:
         self.checkpoint = checkpoint
         self.file_checkpoint = file_checkpoint
         self.praw = praw
+        self.check_totals = check_totals
+        self.sort_var = sort_var
 
         if batch_size:
             self.batch_size = batch_size
@@ -221,6 +223,8 @@ class PushshiftAPIBase:
                 safe_exit=False,
                 cache_dir=None,
                 filter_fn=None,
+                sort_var='sort',
+                check_totals=True,
                 **kwargs):
 
         # raise error if aggs are requested
@@ -231,7 +235,7 @@ class PushshiftAPIBase:
         self.metadata_ = {}
         self.resp_dict = {}
         self.req = Request(copy.deepcopy(kwargs), filter_fn, kind,
-                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir, self.praw)
+                           max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir, self.praw, sort_var)
 
         # reset stat tracking
         self._reset()
@@ -248,7 +252,7 @@ class PushshiftAPIBase:
             if 'ids' not in self.req.payload and len(self.req.req_list) == 0:
                 # check to see how many results are remaining
                 self.req.req_list.appendleft((url, self.req.payload))
-                self._multithread(check_total=True)
+                self._multithread(check_total=check_totals)
                 total_avail = self.metadata_.get('total_results', 0)
 
                 if self.req.limit is None:
