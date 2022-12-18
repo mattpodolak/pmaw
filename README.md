@@ -135,8 +135,8 @@ A user-defined function can be provided using the `filter_fn` parameter for eith
 
 ## Unsupported Parameters
 
-- `sort='asc'` is unsupported as it can have unexpected results
-- `before` and `after` only support epoch time (float or int)
+- `order='asc'` is unsupported as it can have unexpected results
+- `until` and `since` only support epoch time (float or int)
 - `aggs` are unsupported, as **PMAW** is intended to be used for collecting large numbers of submissions or comments. Use [PSAW](https://github.com/dmarx/psaw) for aggregation requests.
 
 ### Feature Requests
@@ -180,7 +180,7 @@ A user-defined function can be provided using the `filter_fn` parameter for eith
 
 ### Keyword Arguments
 
-- Unlike the Pushshift API, the `before` and `after` keyword arguments must be in epoch time
+- Unlike the Pushshift API, the `until` and `since` keyword arguments must be in epoch time
 - `limit` is the number of submissions/comments to return. If set to `None` or if the set `limit` is higher than the number of available submissions/comments for the provided parameters then `limit` will be set to the amount available.
 - Other accepted parameters are covered in the Pushshift documentation for [submissions](https://github.com/pushshift/api#searching-submissions) and [comments](https://github.com/pushshift/api#searching-comments).
 
@@ -287,7 +287,7 @@ reddit = praw.Reddit(
 )
 
 api_praw = PushshiftAPI(praw=reddit)
-comments = api_praw.search_comments(q="quantum", subreddit="science", limit=100, before=1629990795)
+comments = api_praw.search_comments(q="quantum", subreddit="science", limit=100, until=1629990795)
 ```
 
 ## Custom Filter
@@ -339,11 +339,11 @@ If you expect that your query may be interrupted while its running, setting `saf
 from pmaw import PushshiftAPI
 
 api = PushshiftAPI()
-posts = api.search_submissions(subreddit="science", limit=700000, before=1613234822, safe_exit=True)
+posts = api.search_submissions(subreddit="science", limit=700000, until=1613234822, safe_exit=True)
 print(f'{len(posts)} posts retrieved from Pushshift')
 ```
 
-A `before` value is required to load previous responses / requests when using non-id search, as `before` is set to the current time when the `search` method is called, which would result in a different set of parameters then when you last ran the search despite all other parameters being the same.
+A `until` value is required to load previous responses / requests when using non-id search, as `until` is set to the current time when the `search` method is called, which would result in a different set of parameters then when you last ran the search despite all other parameters being the same.
 
 ### Loading Cache with Key
 
