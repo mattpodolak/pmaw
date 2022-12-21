@@ -19,7 +19,7 @@ class PushshiftAPIBase:
 
     def __init__(self, num_workers=10, max_sleep=60, rate_limit=60, base_backoff=0.5,
                  batch_size=None, shards_down_behavior='warn', limit_type='average', jitter=None,
-                 checkpoint=10, file_checkpoint=20, praw=None):
+                 checkpoint=10, file_checkpoint=20, praw=None, https_proxy=None):
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
@@ -33,7 +33,10 @@ class PushshiftAPIBase:
             self.batch_size = batch_size
         else:
             self.batch_size = num_workers
-
+        if https_proxy is not None:
+            self.proxies = {"https": https_proxy }
+        else:
+            self.proxies = {}
         # instantiate rate limiter
         self._rate_limit = RateLimit(
             rate_limit, base_backoff, limit_type, max_sleep, jitter)
@@ -50,7 +53,7 @@ class PushshiftAPIBase:
 
     def _get(self, url, payload={}):
         self._impose_rate_limit()
-        r = requests.get(url, params=payload)
+        r = requests.get(url, params=payload, proxies=self.proxies)
         status = r.status_code
         reason = r.reason
 
