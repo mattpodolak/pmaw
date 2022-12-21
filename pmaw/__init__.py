@@ -1,11 +1,11 @@
 # PMAW
-# Copyright 2022 Matthew Podolak
+# Copyright 2023 Matthew Podolak
 # See LICENSE for details.
 
 """
 PMAW: Pushshift Multithread API Wrapper
 """
-__version__ = '2.1.3'
+__version__ = '3.0.0'
 __author__ = 'Matthew Podolak'
 __license__ = 'MIT'
 

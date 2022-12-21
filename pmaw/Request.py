@@ -38,12 +38,12 @@ class Request:
             raise ValueError('filter_fn must be a callable function')
 
         if safe_exit and self.payload.get('until', None) is None:
-            # warn the user not to use safe_exit without setting before,
+            # warn the user not to use safe_exit without setting until,
             # doing otherwise will make it impossible to resume without modifying 
-            # future query to use before value from first run
+            # future query to use until value from first run
             before = int(dt.datetime.now().timestamp())
             payload['until'] = before
-            warnings.warn(f'Using safe_exit without setting before value is not recommended. Setting before to {before}')
+            warnings.warn(f'Using safe_exit without setting until value is not recommended. Setting until to {before}')
 
         if self.praw is not None:
             if safe_exit:
@@ -185,17 +185,19 @@ class Request:
 
         payload['size'] = self.max_results_per_request
 
-        if 'sort' not in payload:
-            payload['sort'] = 'created_utc'
-        elif payload.get('sort') != 'created_utc':
-            err_msg = "Support for non-default sort has not been implemented as it may cause unexpected results"
-            raise NotImplementedError(err_msg)
+        # set to true to get a real count, 
+        # otherwise `total_results` estimate maxes out at 10000
+        payload['track_total_hits'] = True
+
+        # we need to sort by created_utc for slicing to work
+        payload['sort'] = 'created_utc'
 
         if 'order' not in payload:
-            payload['order'] = 'asc'
+            payload['order'] = 'desc'
+        elif payload.get('order') != 'desc':
+            err_msg = "Support for non-default order has not been implemented as it may cause unexpected results"
+            raise NotImplementedError(err_msg)   
 
-        if 'metadata' not in payload:
-            payload['metadata'] = 'true'
         if 'until' not in payload:
             payload['until'] = int(dt.datetime.now().timestamp())
         if 'filter' in payload:
