@@ -77,9 +77,14 @@ class PushshiftAPIBase:
 
     @property
     def shards_are_down(self):
-        shards = self.metadata_.get('shards')
+        try:
+            shards = self.metadata_['es'].get('_shards')
+        except KeyError:
+            return True
+
         if shards is None:
-            return
+            return True
+
         return shards['successful'] != shards['total']
 
     def _multithread(self, check_total=False):
@@ -146,13 +151,13 @@ class PushshiftAPIBase:
                         break
 
                     # handle time slicing logic
-                    if 'before' in payload and 'after' in payload:
-                        before = payload['before']
-                        after = payload['after']
+                    if 'until' in payload and 'since' in payload:
+                        until = payload['until']
+                        since = payload['since']
                         log.debug(
-                            f"Time slice from {after} - {before} returned {len(data)} results")
+                            f"Time slice from {since} - {until} returned {len(data)} results")
                         total_results = self.resp_dict.get(
-                            (after, before), 0)
+                            (since, until), 0)
                         log.debug(
                             f'{total_results} total results for this time slice')
                         # calculate remaining results
@@ -171,10 +176,10 @@ class PushshiftAPIBase:
                             # Fix issue where Pushshift occasionally reports remaining results that it is
                             # unable to return - len(data) == 0 when this happens                    
                             if len(data) > 0:
-                                before = data[-1]['created_utc']
+                                until = data[-1]['created_utc']
                                 # generate payloads
                                 self.req.gen_slices(
-                                    url, payload, after, before, num)
+                                    url, payload, since, until, num)
 
             except HTTPError as exc:
                 log.debug(f"Request Failed -- {exc}")
@@ -249,7 +254,14 @@ class PushshiftAPIBase:
                 # check to see how many results are remaining
                 self.req.req_list.appendleft((url, self.req.payload))
                 self._multithread(check_total=True)
-                total_avail = self.metadata_.get('total_results', 0)
+                if len(self.metadata_) != 0:
+                    try:
+                        total_avail = self.metadata_['es']['hits']['total']['value']
+                    except KeyError:
+                        log.info(f'Result(s) in Pushshift undetermined')
+                        total_avail = 0  # ¯\_(ツ)_/¯
+                else:
+                    total_avail = 0  # ¯\_(ツ)_/¯
 
                 if self.req.limit is None:
                     log.info(f'{total_avail} result(s) available in Pushshift')
