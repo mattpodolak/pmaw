@@ -32,7 +32,6 @@ class Metadata:
     @property
     def ranges(self) -> Tuple[Optional[int], Optional[int]]:
         after, before = None, None
-        print(self._metadata)
         query_params = self._metadata['es_query']['query'].get('bool', None)
 
         # if searching by ids before and after timestamps wont exist

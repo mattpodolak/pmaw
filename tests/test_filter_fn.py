@@ -1,4 +1,6 @@
-from .config import tape, reddit, post_ids, comment_ids
+from .config import tape, reddit
+from .__mocks__.comment import ids as comment_ids 
+from .__mocks__.submission import ids_with_data as post_ids 
 from pmaw import PushshiftAPI
 import pytest
 
@@ -16,20 +18,24 @@ def test_search_ids_filter():
   def fxn(item):
     return item['score'] > 2
   posts = api.search_submissions(ids=post_ids, filter_fn=fxn)
-  assert(len(posts) == 2)
+  assert(len(posts) == 0)
 
-def test_submission_comment_id_exception():
-  with pytest.raises(ValueError):
-    api = PushshiftAPI()
-    def fxn(item):
-      return item['score'] > 2
-    posts = api.search_submission_comment_ids(ids=post_ids, filter_fn=fxn)
+# TODO: add submission_comment_ids test once endpoint is working again
+# @tape.use_cassette('test_submission_comment_ids_search')
+# def test_submission_comment_id_exception():
+#   with pytest.raises(ValueError):
+#     api = PushshiftAPI()
+#     def fxn(item):
+#       return item['score'] > 2
+#     posts = api.search_submission_comment_ids(ids=post_ids, filter_fn=fxn)
 
+@tape.use_cassette('test_submission_search_ids')
 def test_filter_callable():
   with pytest.raises(ValueError):
     api = PushshiftAPI()
     posts = api.search_submissions(ids=post_ids, filter_fn='fxn')
 
+@tape.use_cassette('test_submission_search_ids')
 def test_filter_param_exception():
   with pytest.raises(TypeError):
     api = PushshiftAPI()
@@ -37,6 +43,7 @@ def test_filter_param_exception():
       return True
     posts = api.search_submissions(ids=post_ids, filter_fn=fxn)
 
+@tape.use_cassette('test_submission_search_ids')
 def test_filter_key_exception():
   with pytest.raises(KeyError):
     api = PushshiftAPI()

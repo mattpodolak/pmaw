@@ -232,4 +232,681 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: GET
+    uri: https://api.pushshift.io/reddit/comment/search?ids=gjacwx5,gjad2l6,gjadatw,gjadc7w,gjadcwh,gjadgd7,gjadlbc,gjadnoc,gjadog1,gjadphb&filter=id
+  response:
+    body:
+      string: !!binary |
+        oageACD+O/X9aT8zeqLUO60hsojB/VVwfrGY/5sR9bKsMOHet75pa2DZBlxbMNJA2nRr6YmfHdih
+        nm4ToiUF9ShiCt3aDy/k1BLo68KaQZi3lF/LDzoTQp6zgDyeI+j4gczZwcY/C8D9AaVGl4d9YPzz
+        16B/M5TP5/kBPc7jYLiXluJ434VSQRfa87mDlNIMbb2XPDzPBprSUQvD47wPnyw9pgyvJdVSQZJh
+        qEv6ZAvntHSAvOQM9RzHUut0trF9fb1KBnGGPPV9IN4ZlrUt88JvYRMgwRkSwx/0fIBQ3ugM9/R3
+        qOPzU8I4pneGUof3WT7/QBfq+v8IYnV1jzG8WUFfyoSgnVNaOMbjnjsriSC01hQlMS1kQLwVJM8N
+        VxL1PFiBe72XBNdKfPfOkOa5gq7OUJ+fBrqQp/6LkoezjSDkUkfEFZAgXHEqEWpEOYKuiDVXhg3w
+        jyOUCCVCiWAdbG8/giINRfQOhvRahwKAhw9tvReQsE5oJ40RN2u9F8EpGp+Sj18fCgKw9BkTgnDu
+        pqS13vZueeRR9jcXuDNKm2OeGn/lLjdtNbdOmyC41dqo3gE=
+    headers:
+      CF-Cache-Status:
+      - MISS
+      CF-RAY:
+      - 77ce1669db4c634b-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - br
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 21 Dec 2022 05:06:18 GMT
+      Last-Modified:
+      - Wed, 21 Dec 2022 05:06:18 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=eDHN5bU9LtlKXUMfPGGNleW8BGBs6VD3TUGV0DnDK6Sy4h6RCMYlGycnA9tgGQAxkK5wY4guUFtD9qIRcs8YV3pzwMhp2pJYS9qO5GKZ0JqPloiWpAUKcud7RPfjc8KNpatR"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400
+      cache-control:
+      - public, max-age=2, s-maxage=2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: grant_type=client_credentials
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - close
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - 'python: PMAW v2 endpoint testing (by u/potato-sword) PRAW/7.6.0 prawcore/2.3.0'
+    method: POST
+    uri: https://www.reddit.com/api/v1/access_token
+  response:
+    body:
+      string: '{"access_token": "-SJB395x2lyBMFnfD3GTmh7VbXKheUQ", "token_type": "bearer",
+        "expires_in": 86400, "scope": "*"}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - private, max-age=3600
+      Connection:
+      - close
+      Content-Length:
+      - '110'
+      Date:
+      - Wed, 21 Dec 2022 05:06:18 GMT
+      NEL:
+      - '{"report_to": "w3-reporting-nel", "max_age": 14400, "include_subdomains":
+        false, "success_fraction": 0.2, "failure_fraction": 0.2}'
+      Report-To:
+      - '{"group": "w3-reporting-nel", "max_age": 14400, "include_subdomains": true,  "endpoints":
+        [{ "url": "https://w3-reporting-nel.reddit.com/reports" }]}, {"group": "w3-reporting",
+        "max_age": 14400, "include_subdomains": true, "endpoints": [{ "url": "https://w3-reporting.reddit.com/reports"
+        }]}'
+      Server:
+      - snooserv
+      Set-Cookie:
+      - edgebucket=73dCEhRVuK1lmaq2Gw; Domain=reddit.com; Max-Age=63071999; Path=/;  secure
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains
+      Via:
+      - 1.1 varnish
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-type:
+      - application/json; charset=UTF-8
+      x-moose:
+      - majestic
+      x-ratelimit-remaining:
+      - '299'
+      x-ratelimit-reset:
+      - '222'
+      x-ratelimit-used:
+      - '1'
+      x-reddit-loid:
+      - 0000000000v44ibpau.2.1671599178954.Z0FBQUFBQmpvcFJLTkhkcndvdEVURmNra3dyRlJ3OWN1al94Ri1uTWhnSWJmWFBfZGEwMmczX3lHNjVkRl9KY2hqRUZZbXVtVDl3dTcyT0Fjcm5ELWdnWGdVVHEyc21WQ3gxQ24tTlZSQnF6VU9fOE13NkdOb0JLLV9YZkpuTjVTalRHQlVhQWNzUnM
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      Cookie:
+      - edgebucket=73dCEhRVuK1lmaq2Gw
+      User-Agent:
+      - 'python: PMAW v2 endpoint testing (by u/potato-sword) PRAW/7.6.0 prawcore/2.3.0'
+    method: GET
+    uri: https://oauth.reddit.com/api/info/?id=t1_gjadphb%2Ct1_gjadog1%2Ct1_gjadnoc%2Ct1_gjadlbc%2Ct1_gjadgd7%2Ct1_gjadcwh%2Ct1_gjadc7w%2Ct1_gjadatw%2Ct1_gjad2l6%2Ct1_gjacwx5&raw_json=1
+  response:
+    body:
+      string: !!binary |
+        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
+        2MEhNlAAAA==
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - private, max-age=3600
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2515'
+      Date:
+      - Wed, 21 Dec 2022 05:06:19 GMT
+      NEL:
+      - '{"report_to": "w3-reporting-nel", "max_age": 14400, "include_subdomains":
+        false, "success_fraction": 0.2, "failure_fraction": 0.2}'
+      Report-To:
+      - '{"group": "w3-reporting-nel", "max_age": 14400, "include_subdomains": true,  "endpoints":
+        [{ "url": "https://w3-reporting-nel.reddit.com/reports" }]}, {"group": "w3-reporting",
+        "max_age": 14400, "include_subdomains": true, "endpoints": [{ "url": "https://w3-reporting.reddit.com/reports"
+        }]}'
+      Server:
+      - snooserv
+      Set-Cookie:
+      - loid=0000000000v44ibpau.2.1671599178000.Z0FBQUFBQmpvcFJMTzlqZ254X1FlQjlZOGMteTFjVkpCVzNzUXJhYTVaMWNVZmIybmpKMkRhN0lvSEdweEk2OENKUldmcUhyVDVoLXNINW1LalZ3RWdyQ09acS1fYlVXamd3VmdCQWZIdFAwSlg2TEZMSkNVQXJYeUpBcl9BWFY0T3IyTTZFNW0tc3g;
+        Domain=reddit.com; Max-Age=63071999; Path=/; expires=Fri, 20-Dec-2024 05:06:19
+        GMT; secure; SameSite=None; Secure
+      - session_tracker=qnqfbgkodbgdlgiifn.0.1671599179056.Z0FBQUFBQmpvcFJMT0EyVkhCVFV5NXkxeE1QdnJpMmlaSTFBeW0tTjBkZ2dxVXNNYTlpZnZLT2lGX09QVFRrYXNiT19lQzJDRG1WOVNrQXd2MXRmcTdmaGUyN19tQW9RQzFGbGpNbjlSUzV4ekM1N2xMN3duc2RPWDh5UDV6c0h4M3NxSWI1YzFXSkw;
+        Domain=reddit.com; Max-Age=7199; Path=/; expires=Wed, 21-Dec-2022 07:06:19
+        GMT; secure; SameSite=None; Secure
+      - csv=2; Max-Age=63072000; Domain=.reddit.com; Path=/; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains
+      Vary:
+      - accept-encoding
+      Via:
+      - 1.1 varnish
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-Moose
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json; charset=UTF-8
+      x-moose:
+      - majestic
+      x-ratelimit-remaining:
+      - '299'
+      x-ratelimit-reset:
+      - '221'
+      x-ratelimit-used:
+      - '1'
+      x-ua-compatible:
+      - IE=edge
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: GET
+    uri: https://api.pushshift.io/reddit/comment/search?ids=gjacwx5,gjad2l6,gjadatw,gjadc7w,gjadcwh,gjadgd7,gjadlbc,gjadnoc,gjadog1,gjadphb&filter=id
+  response:
+    body:
+      string: !!binary |
+        obAeACD+O/X9aT8zegLc4E5riBAxuDVwfkHM/82IellWGCXQ+9Y3bQ0s24BrC0YayLyjNfWI74AO
+        9XSbFQwpqEcRU+jWfpjhXXKgr4zZgzAuzl/TDwoTQs5RQI6zB20/kNF3sP7PBOj+gFxiyq19oP/z
+        t0H5ZgjPcz6g4902hj0kF8f7MkIEZaTzXEFSVAxp3oO355tAg9tiYDje3X6y9Jhgr8nFEEGSwcbJ
+        Pd7COcltICU5Q3z7PsQ4vGNqna8reBBnyFM/BOKFYZrTsjJ+C5sCCc6QGP6g8wAh3CgMu/trY38+
+        IYxjSmEI0d5veP6BMuL8/4hibXaPNbw1gr6qRuu666padIzHFe9aSWhR1zWtklgtpEZUK0iKN7yS
+        qOLa1lzpvSR4XYnvUhjcOEZQLgzxfBIoI0/9B8HbN/Ug+BB7xBWSIGQzVQPNoGpA2WD2keEC/GMD
+        1UA1UA04B7s7MCBDYwalgMFdsy0AeLhN8x5Aou1E3cmmEZ+2VUroTtF8Qj5+wxYE4OgLSnDVyk+l
+        2lpp3frh8J1afVrBK65a9q0Jd+7ykbJSQnWd0lq0WstSAA==
+    headers:
+      CF-Cache-Status:
+      - MISS
+      CF-RAY:
+      - 77e246809c9fa210-YYZ
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - br
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 23 Dec 2022 15:54:23 GMT
+      Last-Modified:
+      - Fri, 23 Dec 2022 15:54:23 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=rvgAOHagG9dKdAgVpn9Q7LU3YpU7vJsGW0Ot4V%2FrdeZK%2Bi%2BAMxlxkHxcObOQU3vnaHnKkDHwmg%2BECnBrp6FzwhKCXxK%2FMb7arxusRcy1rnstRTNh7a87OBGUDCG7HHxRUn3K"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400
+      cache-control:
+      - public, max-age=2, s-maxage=2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: grant_type=client_credentials
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - close
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - 'python: PMAW v2 endpoint testing (by u/potato-sword) PRAW/7.6.0 prawcore/2.3.0'
+    method: POST
+    uri: https://www.reddit.com/api/v1/access_token
+  response:
+    body:
+      string: '{"access_token": "-8mP5sMjrYmUV3BY7E9MNQcbYYb5tDg", "token_type": "bearer",
+        "expires_in": 86400, "scope": "*"}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - private, max-age=3600
+      Connection:
+      - close
+      Content-Length:
+      - '110'
+      Date:
+      - Fri, 23 Dec 2022 15:54:23 GMT
+      NEL:
+      - '{"report_to": "w3-reporting-nel", "max_age": 14400, "include_subdomains":
+        false, "success_fraction": 0.2, "failure_fraction": 0.2}'
+      Report-To:
+      - '{"group": "w3-reporting-nel", "max_age": 14400, "include_subdomains": true,  "endpoints":
+        [{ "url": "https://w3-reporting-nel.reddit.com/reports" }]}, {"group": "w3-reporting",
+        "max_age": 14400, "include_subdomains": true, "endpoints": [{ "url": "https://w3-reporting.reddit.com/reports"
+        }]}'
+      Server:
+      - snooserv
+      Set-Cookie:
+      - edgebucket=fb2NlNR6cOpdDG3phV; Domain=reddit.com; Max-Age=63071999; Path=/;  secure
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains
+      Via:
+      - 1.1 varnish
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-type:
+      - application/json; charset=UTF-8
+      x-moose:
+      - majestic
+      x-ratelimit-remaining:
+      - '299'
+      x-ratelimit-reset:
+      - '337'
+      x-ratelimit-used:
+      - '1'
+      x-reddit-loid:
+      - 0000000000v5wetie3.2.1671810863753.Z0FBQUFBQmpwYzh2SzZQLTdhOEFPcTdOdkJaMzduaElrcTJFdDhKM2VpYWxqcFRha3k4NXNNb3ZKckxkRzdJMmpZYWhtLVlXenVGR3NWemJDT2dRSlVBc0ZLNnhTNHJldWJ0MDM1ekFhLVMxSWI0X0JGRDNMYWNJaFNOa05YRjd5U0QzaUpfSjBZWW4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      Cookie:
+      - edgebucket=fb2NlNR6cOpdDG3phV
+      User-Agent:
+      - 'python: PMAW v2 endpoint testing (by u/potato-sword) PRAW/7.6.0 prawcore/2.3.0'
+    method: GET
+    uri: https://oauth.reddit.com/api/info/?id=t1_gjadphb%2Ct1_gjadog1%2Ct1_gjadnoc%2Ct1_gjadlbc%2Ct1_gjadgd7%2Ct1_gjadcwh%2Ct1_gjadc7w%2Ct1_gjadatw%2Ct1_gjad2l6%2Ct1_gjacwx5&raw_json=1
+  response:
+    body:
+      string: !!binary |
+        H4sIAC/PpWMC/+1cbW/bOBL+Kzz3Q+8Ax7acxEl6OCy6iy6QQ4oCm93uh2YhUBJtMZZIlaQi+4r+
+        9xu+SJZiJxvbspu0BtrCosnhcF6eZ0jK/dKZUhZ13qDOFZWKskmnizoRVhiavnTwWBEBn1ieJLod
+        usCTN4DPKY9iLGM9Ug+ZEO6PaWK7m5YwpkkkCIPnT1+qWZTXmEDmgSBRRJVP7den/vBzPBzqTjjL
+        BL8jkY+Vn6twoQbOVcyFT6UfJDycEj1yjBNJ9Kw8TQlTvppnZDGCwAyNbqC9LwiWnPnBfNEvwIzB
+        hPWmPJPwMIRPLE9hTMaF0i1NXcYJpqKctKPITOkVKK5w4uMCi0jC0JDQO6OFtl+1cj0AM5oSs+aG
+        OJJmCVbE2sZNmNApqc0PCiXUNBij55KImpKf/tIzYTtruXZr6cktjrI40IPcqu+buWYjRVVSM+cE
+        PFstBAvwtJ1Bidz6IElwJkk1PORRbTSDSIEevFiMsMvWar39KDCLeJpLGpoowszXimTchF65BkmY
+        ll6u3YnJsNC+d6Hk+XqN4Vmh5ciQC62DdmRpZFCH4dR6bOifnZwRPIhi3dta0KnfsHbK78Cl9otF
+        exWq9cjBifM9ZFXljIBHukvnv0TmsoskTwnKCM8Sgm5zqdCEK4WRzp0Ez3omJLQIIioJimdWLEzX
+        jPKIF0ZZ45V6IIVS+mGC5XLcZlgJAh4y/Wr2rVxYa2uIFDSMTZg7rSAZIaJTqiwClGP0cv1YpYle
+        800+GBz/EtE7ZJT5z00njW5s6zv7XWYfnmYcO6Tvxtww9wzybYuBJYhUZ/4vX+vrWnahlDykkG2R
+        te7iG4DFcEpXmSKDeKB5WrcbhKues1PFZELZtIzIY386o8Pi3GQqM+GLg4Qs69JEgZmCDEpMfpQq
+        6Wj2YxpFBl/L2TMiUqwn1LP1Rd/ASt9BouzbyftSRxA0ArZQBsbxccBzQMyYwF86iaVPWd/BQ9/k
+        TgXSJcBleZDY/FwC4CqjbPo5iAlhiRaBvZE3GI3Oz7yz3lKcuoByi1R6jAVzvEggJ8lB1T1pC021
+        Gto/Yzoz03acNYwynCmdrkJSsJbS+bikSoDD6UTwHGDmnu0XIRSQEAPg+qHghe6mpepAb+BnA4p1
+        E+OqnrOWdXMqY6Onbv4KkfriGfPo+6RMPjHueE6UycZ+jCNYkJazLV0mgUnrki6NF1fzZSzoZ88k
+        9+7Z8hJFNGKvFSIUYEogFWP1WqIiniOqEPiCzyUCspAcpXkYm+9L5oBFohRDNk2Q1N9hFNAJighO
+        kAE+kPByedZ5cjOatVbVn4ejV8cX/26Yd9Hcop0PlL1jygZ42pqyHcQtU/bguE3KdtIOlP1sKPuk
+        +z0yNuMm6r8hYzchSOvV/i63MPvWkra1J1ez9n53udcwMUp40kOXqMBMIcVRQEqaQTfsbQ+FIteJ
+        hII5MhGCLKIBOTAu9L8/99CEAPvYLxBYHWVUm1ZLfrHMXY7ZjLofNaztGYh+SbOPWPk+ITtKdg3c
+        yXqww6O+WRprnw9s3xbbA7RtzfYOHpfYfnThtcj2pbQD2z8btj867a5D9xWcdVum/M4o8ILj0Xhw
+        NPaId+R5JDjCF8OzIzIkYUCii9PzsTFem0WB2+buqyjoXH3407/+5cNvBvMe3c2/xxn/nY/z95iZ
+        VNi8MqiDWbWf105fXRl4NPssRuRWd999ZXCJYs6IVMm82trfEYYg92hIUM4UTYDaJC6QjSZUguRi
+        M9l7Htv2hgdXcP+XjsaFzpt3f7zR+hpzgxlvqYla/RQrlck3/b5p7dn1ppDfuAeL7hfnKr8Ts3ks
+        TrDnl2jSf/dHx6CQE/5xM+H4dJbx6f+WhH+sC7/eTPbF9DY7mWReODqty76ui77cTPQ4CPOBV6Tj
+        pujLuuj3m4m+HYvZ3ewkYk3R761omywlDNalpXMDdgnQRY8R1YeEGNOE9H/GgrOfBZ3RXHa+tl4I
+        3ssj3Vgd5qyfUC1VbCVlIQM7UJjqglDFgsiYQ+mls+VFFHMgbhIbV++nngNW2rqec8y2XM+dnj9Y
+        zxlw0hgCqQ4pCamzVlR31ysFnSI7LQU7r4bk1MOmbjjUg0+qB73uOuXgTkpBN2Gbhd4kOtOD9lXo
+        udGPVnit3tdg1Xi9QTtxdXm33+uaGByiuSfW1wF4ArgnFQK/6kdoDKfu/KGH0jkC8YDLKdKrRQVV
+        +l6huvgvYm6uFiLBs8wOJwh4pEAumxEf/8hXOPu3dEtFQmndF1EJlCrtpQwAzNq6DHC4t1QGnJ6P
+        HiwD3CLX4PJS2k653Kl1oPEn0fhFdx0a39mpjpu0TSp3dxzfkMqbMKT1usZpjgui31Tbks5XndZo
+        X65mc29EBDcBugc2H8PGEVZ2kw8H3oVCBVb6et/cIoy5flvA3CZUTNPVLQzoRL9EoIdIyzKcwo6Q
+        MjvesJURgRWC6XdzmmOirE3+rg4X3l5tdrxwzIbTW3aSp5Sc1Y8X3l5tesDwTvD3mE3wr5jt4nxh
+        T85/TkVFCQw7rimAW8S0SvedVxUAn1tXFQ6Cl6uK44ff5rTJsk4Ud9erQdzcO61B7C8aDhXIUyqQ
+        I++4u04N8mLqD/tLgn3VH2vcGbV5ohAWs9MKlDqlN1dXIfs8U3A/ANAvOmhCYaRA0ghF8CcUOQvj
+        OYIsTIBZIhTGxFASqY65e+j3mFChT8VFERNBenpgABtnRDIqweZyFxVIM/CfUoP83X3SCorf6ghh
+        H4Ztid1LxHrp9wqlSvvh/bNie9630LfM+8OHed8tch0md9J2yuROrQOXP4nLtUW/PyZ3h+b7YnI3
+        +lEKfxvMpTSbIyIA10yAb87kqw4T6smRN2j8OMnPmcxN790T+dWHq645Z57zHJhGUJ5LJPRFK2K8
+        +Em/YnjNhZijwv3qz7zfqE9Y7Bk38JT2LErA+Kbi+eaMfY9PnkTZ5ZjNOPvvbHifbpsvbT7dvEuC
+        NuPt0qQHcr5PzoBEW5OzQ7Nlch48fOPvFrkOOTtpG5Nz/WryQM7dFsh5vW32SzrqHyaj50bQv3Ke
+        SP838jmnJN0BPT+8y56z9Jjvh5s//fXPVwyS/1874NUf4SzeBEkZI+0fxtsHjGDHO4ZexlXNjn3c
+        ePqhiHvP5+mAUVtTt8O5Jeo+vhg8SN1PO09vRGJ3LaYvJ9+Y6Zc0X8H0hwP1p/P8qLsOz78Qji/P
+        mb8hxzcRS+vV4u8yV3G8duRqjt/vzzL/jPlrqQ9wS5D7CV2+Tqtf8UkFRviHiYh2S4Bm2LZSBLTO
+        sWAb/aH8rw+aRlp8c99aPyLhlirtg241XGxLtyXkLNOt9zDdukWuw59O2k7506m1DwY1yEHGFsJs
+        0/8BS5qvMDZQAAA=
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - private, max-age=3600
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2519'
+      Date:
+      - Fri, 23 Dec 2022 15:54:23 GMT
+      NEL:
+      - '{"report_to": "w3-reporting-nel", "max_age": 14400, "include_subdomains":
+        false, "success_fraction": 0.2, "failure_fraction": 0.2}'
+      Report-To:
+      - '{"group": "w3-reporting-nel", "max_age": 14400, "include_subdomains": true,  "endpoints":
+        [{ "url": "https://w3-reporting-nel.reddit.com/reports" }]}, {"group": "w3-reporting",
+        "max_age": 14400, "include_subdomains": true, "endpoints": [{ "url": "https://w3-reporting.reddit.com/reports"
+        }]}'
+      Server:
+      - snooserv
+      Set-Cookie:
+      - loid=0000000000v5wetie3.2.1671810863000.Z0FBQUFBQmpwYzh2WGxKV043UENBc3JOS3hoM2FqeFVkWk9wX093UFhLX0JBWk53bXFHcDFVdUlmZ09YZEs0NlZDZE9faUx2cWtJeUxtNTdLQ19YSVZFQzVCVHJ5dHhsT1haaWd3U0M4aHJJOGtwQzMtRG02LXRHQVN0dG1tY1IydnhOdE9ZNS04Umg;
+        Domain=reddit.com; Max-Age=63071999; Path=/; expires=Sun, 22-Dec-2024 15:54:23
+        GMT; secure; SameSite=None; Secure
+      - session_tracker=klaiabhepbljijfcib.0.1671810863903.Z0FBQUFBQmpwYzh2THlGSVlDZ2ZJVmxIRWltY2NUQ0ZBTW5WUHJ1d0xYQlh6dkFJRU9TZnIwMVpuMWljRW1zcmpzeEJKbktoTTd2SGUyWV9DU3A3R2JYNGZkeVJQQkUySzlGY0FMZk0wY1NURVE1V25rUlRRbm1YWGFrVlM4aWNVODgzWWFkakprSEw;
+        Domain=reddit.com; Max-Age=7199; Path=/; expires=Fri, 23-Dec-2022 17:54:23
+        GMT; secure; SameSite=None; Secure
+      - csv=2; Max-Age=63072000; Domain=.reddit.com; Path=/; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains
+      Vary:
+      - accept-encoding
+      Via:
+      - 1.1 varnish
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-Moose
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json; charset=UTF-8
+      x-moose:
+      - majestic
+      x-ratelimit-remaining:
+      - '299'
+      x-ratelimit-reset:
+      - '337'
+      x-ratelimit-used:
+      - '1'
+      x-ua-compatible:
+      - IE=edge
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: GET
+    uri: https://api.pushshift.io/reddit/comment/search?ids=gjacwx5,gjad2l6,gjadatw,gjadc7w,gjadcwh,gjadgd7,gjadlbc,gjadnoc,gjadog1,gjadphb&filter=id
+  response:
+    body:
+      string: !!binary |
+        oageACD+O/X9aT8zeqLUO60hsojB/VVwfrGY/5sR9bKsMAu8961v2hpYtgHXFow0kHlHa+oR3wEd
+        6uk2KxhSUI8iptCt/fBCTi2Bvi6sGYR5S/m1/KAzIeQ5C8jjOYKOH8icHWz8swDcH1BqTHnYB8Y/
+        fw36N0P5fJ4f0OM8DoZ7aSmO910oFXShPZ87SGnD0NZ7ycPzbKApHbUwPM778MnSY8rwWlItFSQZ
+        hrqkT7ZwTksHyEvOUM9xLLVO55ja19erZBBnyFM/BOKdYVnbsi78FjYFEpwhMfxBzwcI5Y3OcE9/
+        hzo+PyWMY3pnKHV4n+XzD3Shrv+PKNZW91jDWyvoS5kQtHNKC8d43HNnJRGE1pqmJKaFDIi3guS5
+        4Uqingc7cK/3kuBaie/eGdI8V9DVGerz00AX8tR/UPJwthGEXOqIuEIShCtONUKLqEbQFbHmynAB
+        /nGEGqFGqBGcg90dRFCksYjewZBe61AA8PChrfcCEtYJ7aQx4mat9yI4RfNT8vEbQ0EAjr7ghZDO
+        35wSNijT+uWROyXcgpfGOPatCXfucJOGe6u59EFxa3Xv
+    headers:
+      CF-Cache-Status:
+      - EXPIRED
+      CF-RAY:
+      - 77e250abb907a234-YYZ
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - br
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 23 Dec 2022 16:01:20 GMT
+      Last-Modified:
+      - Fri, 23 Dec 2022 15:54:23 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=jQXHAPubrtArtzGsCHoUGMbtjr4qWqDbhLm7cLnviqJSMnS4FiF7%2FAAYiMb41ECYEcueCIAGGJ3EAn44GFs2UYRRBxpytjgyjK0jHtwLeP2Pc0dFAyI5CYe%2FsaGlqBq4mlB3"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400
+      cache-control:
+      - public, max-age=2, s-maxage=2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      Cookie:
+      - csv=2; edgebucket=fb2NlNR6cOpdDG3phV; loid=0000000000v5wetie3.2.1671810863000.Z0FBQUFBQmpwYzh2WGxKV043UENBc3JOS3hoM2FqeFVkWk9wX093UFhLX0JBWk53bXFHcDFVdUlmZ09YZEs0NlZDZE9faUx2cWtJeUxtNTdLQ19YSVZFQzVCVHJ5dHhsT1haaWd3U0M4aHJJOGtwQzMtRG02LXRHQVN0dG1tY1IydnhOdE9ZNS04Umg;
+        session_tracker=klaiabhepbljijfcib.0.1671810863903.Z0FBQUFBQmpwYzh2THlGSVlDZ2ZJVmxIRWltY2NUQ0ZBTW5WUHJ1d0xYQlh6dkFJRU9TZnIwMVpuMWljRW1zcmpzeEJKbktoTTd2SGUyWV9DU3A3R2JYNGZkeVJQQkUySzlGY0FMZk0wY1NURVE1V25rUlRRbm1YWGFrVlM4aWNVODgzWWFkakprSEw
+      User-Agent:
+      - 'python: PMAW v2 endpoint testing (by u/potato-sword) PRAW/7.6.0 prawcore/2.3.0'
+    method: GET
+    uri: https://oauth.reddit.com/api/info/?id=t1_gjadphb%2Ct1_gjadog1%2Ct1_gjadnoc%2Ct1_gjadlbc%2Ct1_gjadgd7%2Ct1_gjadcwh%2Ct1_gjadc7w%2Ct1_gjadatw%2Ct1_gjad2l6%2Ct1_gjacwx5&raw_json=1
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - private, max-age=3600
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2488'
+      Date:
+      - Fri, 23 Dec 2022 16:01:20 GMT
+      NEL:
+      - '{"report_to": "w3-reporting-nel", "max_age": 14400, "include_subdomains":
+        false, "success_fraction": 0.2, "failure_fraction": 0.2}'
+      Report-To:
+      - '{"group": "w3-reporting-nel", "max_age": 14400, "include_subdomains": true,  "endpoints":
+        [{ "url": "https://w3-reporting-nel.reddit.com/reports" }]}, {"group": "w3-reporting",
+        "max_age": 14400, "include_subdomains": true, "endpoints": [{ "url": "https://w3-reporting.reddit.com/reports"
+        }]}'
+      Server:
+      - snooserv
+      Set-Cookie:
+      - session_tracker=klaiabhepbljijfcib.0.1671811280098.Z0FBQUFBQmpwZERRQlY4M1ZrTUhibEl3U3d0bTNaenRYTURKeXQ0blJzeUhGTGJQNmRWeWhWU29rNnAwV2ZScUJzcEFvazBGSVVDQmRaOHd1NGpkMDZVSjBrWWdSUVJTbXRnbHlwWWRKU2U0cFNRVFBIN3JuOXZXdjUwTXNNTE1JVVduUVJwbVVvRFA;
+        Domain=reddit.com; Max-Age=7199; Path=/; expires=Fri, 23-Dec-2022 18:01:20
+        GMT; secure; SameSite=None; Secure
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains
+      Vary:
+      - accept-encoding
+      Via:
+      - 1.1 varnish
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - X-Moose
+      content-encoding:
+      - gzip
+      content-type:
+      - application/json; charset=UTF-8
+      x-moose:
+      - majestic
+      x-ratelimit-remaining:
+      - '299'
+      x-ratelimit-reset:
+      - '520'
+      x-ratelimit-used:
+      - '1'
+      x-ua-compatible:
+      - IE=edge
+    status:
+      code: 200
+      message: OK
 version: 1
