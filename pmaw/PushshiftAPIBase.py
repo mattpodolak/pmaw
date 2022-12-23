@@ -4,7 +4,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
-from requests import HTTPError
+from pmaw.types.exceptions import HTTPError, HTTPNotFoundError
 from pmaw.Metadata import Metadata
 
 from pmaw.RateLimit import RateLimit
@@ -23,7 +23,7 @@ class PushshiftAPIBase:
         self.num_workers = num_workers
         self.domain = 'api'
         self.shards_down_behavior = shards_down_behavior
-        self.metadata_ = {}
+        self.meta = Metadata({})
         self.resp_dict = {}
         self.checkpoint = checkpoint
         self.file_checkpoint = file_checkpoint
@@ -67,7 +67,11 @@ class PushshiftAPIBase:
 
             return r['data']
         else:
-            raise HTTPError(f"HTTP {status} - {reason}")
+            if(status == 404):
+                raise HTTPNotFoundError(f"HTTP {status} - {reason}")
+            else:
+                # TODO: add custom error types for rate limit and other errors
+                raise HTTPError(f"HTTP {status} - {reason}")
 
     def _multithread(self, check_total=False):
         with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
@@ -163,6 +167,13 @@ class PushshiftAPIBase:
                                 self.req.gen_slices(
                                     url, payload, since, until, num)
 
+            except HTTPNotFoundError as exc:
+                log.debug(f"Request Failed -- {exc}")
+                # dont retry ids not found
+                # it looks like submission/comment_ids/ returns 404s now
+                if 'ids' not in self.req.payload:
+                    self.req.req_list.appendleft(url_pay)
+
             except HTTPError as exc:
                 log.debug(f"Request Failed -- {exc}")
                 self._rate_limit._req_fail()
@@ -210,12 +221,16 @@ class PushshiftAPIBase:
                 filter_fn=None,
                 **kwargs):
 
+        # TODO: remove this warning once 404s stop happening
+        if kind == 'submission_comment_ids':
+            log.warning('submission comment id search may return no results due to COLO switchover')
+
         # raise error if aggs are requested
         if 'aggs' in kwargs:
             err_msg = "Aggregations support for {} has not yet been implemented, please use the PSAW package for your request"
             raise NotImplementedError(err_msg.format(kwargs['aggs']))
 
-        self.metadata_ = {}
+        self.meta = Metadata({})
         self.resp_dict = {}
         self.req = Request(copy.deepcopy(kwargs), filter_fn, kind,
                            max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir, self.praw)

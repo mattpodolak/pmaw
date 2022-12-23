@@ -13,6 +13,9 @@ client_secret = os.environ.get('REDDIT_CLIENT_SECRET')
 def bad_status(response):
     if(response['status']['code'] == 200):
       return response
+    elif(response['status']['code'] == 404):
+      # TODO: remove once submission comment ids endpoint is working
+      return response
     else:
       return None
 
