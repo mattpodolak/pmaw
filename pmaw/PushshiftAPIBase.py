@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 from requests import HTTPError
+from pmaw.Metadata import Metadata
 
 from pmaw.RateLimit import RateLimit
 from pmaw.Request import Request
@@ -57,34 +58,16 @@ class PushshiftAPIBase:
             r = json.loads(r.text)
 
             # check if shards are down
-            self.metadata_ = r.get('metadata', {})
-            total_results = self.metadata_.get('total_results', None)
+            self.meta = Metadata(r.get('metadata', {}))
+            total_results = self.meta.total_results
             if total_results:
-                after, before = None, None
-                for param in self.metadata_['ranges']:
-                    created = param['range']['created_utc']
-                    if created.get('gt', None):
-                        after = created['gt']
-                    elif created.get('lt', None):
-                        before = created['lt']
+                after, before = self.meta.ranges
                 if after and before:
                     self.resp_dict[(after, before)] = total_results
 
             return r['data']
         else:
             raise HTTPError(f"HTTP {status} - {reason}")
-
-    @property
-    def shards_are_down(self):
-        try:
-            shards = self.metadata_['es'].get('_shards')
-        except KeyError:
-            return True
-
-        if shards is None:
-            return True
-
-        return shards['successful'] != shards['total']
 
     def _multithread(self, check_total=False):
         with ThreadPoolExecutor(max_workers=self.num_workers) as executor:
@@ -110,7 +93,7 @@ class PushshiftAPIBase:
                 self._rate_limit._check_fail()
 
                 # check if shards are down
-                if self.shards_are_down and (self.shards_down_behavior is not None):
+                if self.meta.shards_are_down and (self.shards_down_behavior is not None):
                     shards_down_message = "Not all PushShift shards are active. Query results may be incomplete."
                     if self.shards_down_behavior == 'warn':
                         log.warning(shards_down_message)
@@ -253,14 +236,7 @@ class PushshiftAPIBase:
                 # check to see how many results are remaining
                 self.req.req_list.appendleft((url, self.req.payload))
                 self._multithread(check_total=True)
-                if len(self.metadata_) != 0:
-                    try:
-                        total_avail = self.metadata_['es']['hits']['total']['value']
-                    except KeyError:
-                        log.info(f'Result(s) in Pushshift undetermined')
-                        total_avail = 0  # ¯\_(ツ)_/¯
-                else:
-                    total_avail = 0  # ¯\_(ツ)_/¯
+                total_avail = self.meta.total_results
 
                 if self.req.limit is None:
                     log.info(f'{total_avail} result(s) available in Pushshift')

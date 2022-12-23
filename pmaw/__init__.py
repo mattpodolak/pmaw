@@ -15,3 +15,4 @@ from .Response import Response
 from .Cache import Cache
 from .PushshiftAPIBase import PushshiftAPIBase
 from .PushshiftAPI import PushshiftAPI
+from .Metadata import Metadata
