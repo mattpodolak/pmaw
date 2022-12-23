@@ -33,29 +33,3 @@ reddit = praw.Reddit(
  client_secret=client_secret,
  user_agent=f'python: PMAW v2 endpoint testing (by u/potato-sword)'
 )
-
-post_ids = [
-  'kxi2w8',
-  'kxi2g1',
-  'kxhzrl',
-  'kxhyh6',
-  'kxhwh0',
-  'kxhv53',
-  'kxhm7b',
-  'kxhm3s',
-  'kxhg37',
-  'kxhak9'
-]
-
-comment_ids = [
-  'gjacwx5',
-  'gjad2l6',
-  'gjadatw',
-  'gjadc7w',
-  'gjadcwh',
-  'gjadgd7',
-  'gjadlbc',
-  'gjadnoc',
-  'gjadog1',
-  'gjadphb'
-]
