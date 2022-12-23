@@ -210,6 +210,11 @@ class Request:
             # make sure that the created_utc field is returned
             if 'created_utc' not in payload['filter']:
                 payload['filter'].append('created_utc')
+            
+            # there is a bug where multiple filters like:
+            # filter=<field>&filter=<field2>
+            # only returns field2
+            payload['filter'] = ','.join(payload['filter'])
 
     def gen_slices(self, url, payload, after, before, num):
         # create time slices
