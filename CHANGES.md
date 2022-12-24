@@ -1,4 +1,4 @@
-## 3.0.0 (2022/12/2x)
+## 3.0.0 (2022/12/24)
 
 - changed `before` and `after` to `until` and `since`
 - removed `metadata=true` as this is now always enabled
@@ -6,6 +6,7 @@
 - set `sort='created_utc'` so that slicing still works as expected
 - Read more on [COLO switchover](https://www.reddit.com/r/pushshift/comments/zkggt0/update_on_colo_switchover_bug_fixes_reindexing/)
 - refactored metadata usage
+- 🎅🎅🎅🎅🎅🎅🎅🎅🎅🎅🎅🎅🎅🎅
 
 ## 2.1.3 (2022/02/20)
 
