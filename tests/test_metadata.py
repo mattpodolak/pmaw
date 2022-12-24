@@ -6,7 +6,7 @@ def test_before_after_query():
     metadata = Metadata(mock_data.before_after_query)
     total_results = metadata.total_results
     after, before = metadata.ranges
-    assert after == 1629960795000 and before == 1629990795000
+    assert after == 1629960795 and before == 1629990795
     assert total_results == 2184259
 
 
