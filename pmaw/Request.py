@@ -21,7 +21,18 @@ log = logging.getLogger(__name__)
 class Request:
     """Request: Handles request information, response saving, and cache usage."""
 
-    def __init__(self, payload, filter_fn, kind, max_results_per_request, max_ids_per_request, mem_safe, safe_exit, cache_dir=None, praw=None):
+    def __init__(
+        self,
+        payload,
+        filter_fn,
+        kind,
+        max_results_per_request,
+        max_ids_per_request,
+        mem_safe,
+        safe_exit,
+        cache_dir=None,
+        praw=None,
+    ):
         self.kind = kind
         self.max_ids_per_request = min(500, max_ids_per_request)
         self.max_results_per_request = min(100, max_results_per_request)
@@ -29,54 +40,59 @@ class Request:
         self.mem_safe = mem_safe
         self.req_list = deque()
         self.payload = payload
-        self.limit = payload.get('limit', None)
+        self.limit = payload.get("limit", None)
         self.exit = Event()
         self.praw = praw
         self._filter = filter_fn
 
         if filter_fn is not None and not callable(filter_fn):
-            raise ValueError('filter_fn must be a callable function')
+            raise ValueError("filter_fn must be a callable function")
 
-        if safe_exit and self.payload.get('until', None) is None:
+        if safe_exit and self.payload.get("until", None) is None:
             # warn the user not to use safe_exit without setting until,
-            # doing otherwise will make it impossible to resume without modifying 
+            # doing otherwise will make it impossible to resume without modifying
             # future query to use until value from first run
             before = int(dt.datetime.now().timestamp())
-            payload['until'] = before
-            warnings.warn(f'Using safe_exit without setting until value is not recommended. Setting until to {before}')
+            payload["until"] = before
+            warnings.warn(
+                f"Using safe_exit without setting until value is not recommended. Setting until to {before}"
+            )
 
         if self.praw is not None:
             if safe_exit:
-                raise NotImplementedError('safe_exit is not implemented when PRAW is used for metadata enrichment')
+                raise NotImplementedError(
+                    "safe_exit is not implemented when PRAW is used for metadata enrichment"
+                )
 
             self.enrich_list = deque()
-            
-            if not kind == 'submission_comment_ids' :
+
+            if not kind == "submission_comment_ids":
                 # id filter causes an error for submission_comment_ids endpoint
-                self.payload['filter'] = 'id'
+                self.payload["filter"] = "id"
 
             if kind == "submission":
                 self.prefix = "t3_"
             else:
                 self.prefix = "t1_"
-            
-        if 'ids' not in self.payload:
+
+        if "ids" not in self.payload:
             # add necessary args
             self._add_nec_args(self.payload)
 
         if mem_safe or safe_exit:
             # instantiate cache
             _tmp = copy.deepcopy(payload)
-            _tmp['kind'] = kind
+            _tmp["kind"] = kind
             self._cache = Cache(_tmp, safe_exit, cache_dir=cache_dir)
             if safe_exit:
                 info = self._cache.load_info()
                 if info is not None:
-                    self.req_list.extend(info['req_list'])
-                    self.payload = info['payload']
-                    self.limit = info['limit']
+                    self.req_list.extend(info["req_list"])
+                    self.payload = info["payload"]
+                    self.limit = info["limit"]
                     log.info(
-                        f'Loaded Cache:: Responses: {self._cache.size} - Pending Requests: {len(self.req_list)} - Items Remaining: {self.limit}')
+                        f"Loaded Cache:: Responses: {self._cache.size} - Pending Requests: {len(self.req_list)} - Items Remaining: {self.limit}"
+                    )
         else:
             self._cache = None
 
@@ -85,13 +101,13 @@ class Request:
 
     def check_sigs(self):
         try:
-            getattr(signal, 'SIGHUP')
-            sigs = ('TERM', 'HUP', 'INT')
+            getattr(signal, "SIGHUP")
+            sigs = ("TERM", "HUP", "INT")
         except AttributeError:
-            sigs = ('TERM', 'INT')
+            sigs = ("TERM", "INT")
 
         for sig in sigs:
-            signal.signal(getattr(signal, 'SIG'+sig), self._exit)
+            signal.signal(getattr(signal, "SIG" + sig), self._exit)
 
     def _enrich_data(self):
         # create batch of fullnames up to 100
@@ -101,18 +117,18 @@ class Request:
                 fullnames.append(self.enrich_list.popleft())
             except IndexError:
                 break
-        
+
         # exit loop if nothing to enrich
         if len(fullnames) == 0:
             return
-        
+
         try:
             # TODO: may need to change praw usage based on multithread performance
             resp_gen = self.praw.info(fullnames=fullnames)
             praw_data = [vars(obj) for obj in resp_gen]
             results = self._apply_filter(praw_data)
             self.resp.responses.extend(results)
-            
+
         except RedditAPIException:
             self.enrich_list.extend(fullnames)
 
@@ -123,16 +139,16 @@ class Request:
         if self.praw:
             # make multiple enrich requests based on sleep interval
             while current - start < interval and len(self.enrich_list) > 0:
-                
+
                 self._enrich_data()
-                
+
                 current = time.time()
 
         current = time.time()
-        diff = (current - start)
+        diff = current - start
 
         if diff < interval and diff >= 0:
-            time.sleep(interval-diff)
+            time.sleep(interval - diff)
 
     def save_cache(self):
         # trim extra responses
@@ -143,10 +159,15 @@ class Request:
             while len(self.enrich_list) > 0:
                 self._enrich_data()
 
-        if self.safe_exit and not self.limit == None and (self.limit == 0 or self.exit.is_set()):
+        if (
+            self.safe_exit
+            and not self.limit == None
+            and (self.limit == 0 or self.exit.is_set())
+        ):
             # save request info to cache
-            self._cache.save_info(req_list=self.req_list,
-                                  payload=self.payload, limit=self.limit)
+            self._cache.save_info(
+                req_list=self.req_list, payload=self.payload, limit=self.limit
+            )
             # save responses to cache
             self.resp.to_cache()
         elif self.mem_safe:
@@ -157,25 +178,25 @@ class Request:
 
     def _apply_filter(self, results):
         # apply user defined filter function before storing
-        if(self._filter is not None):
+        if self._filter is not None:
             return apply_filter(results, self._filter)
         else:
-            return results    
+            return results
 
     def save_resp(self, results):
         # dont filter results before updating limit: limit is the max number of results
         # extracted from Pushshift, filtering can reduce the results < limit
-        if self.kind == 'submission_comment_ids':
+        if self.kind == "submission_comment_ids":
             self.limit -= 1
         else:
             self.limit -= len(results)
-            
+
         if self.praw:
             # save fullnames of objects to be enriched with metadata by PRAW
-            if self.kind == 'submission_comment_ids':
-                self.enrich_list.extend([self.prefix+res for res in results])
+            if self.kind == "submission_comment_ids":
+                self.enrich_list.extend([self.prefix + res for res in results])
             else:
-                self.enrich_list.extend([self.prefix+res['id'] for res in results])
+                self.enrich_list.extend([self.prefix + res["id"] for res in results])
         else:
             results = self._apply_filter(results)
             self.resp.responses.extend(results)
@@ -183,44 +204,46 @@ class Request:
     def _add_nec_args(self, payload):
         """Adds arguments to the payload as necessary."""
 
-        payload['size'] = self.max_results_per_request
+        payload["size"] = self.max_results_per_request
 
-        # set to true to get a real count, 
+        # set to true to get a real count,
         # otherwise `total_results` estimate maxes out at 10000
-        payload['track_total_hits'] = True
+        payload["track_total_hits"] = True
 
         # we need to sort by created_utc for slicing to work
-        payload['sort'] = 'created_utc'
+        payload["sort"] = "created_utc"
 
-        if 'order' not in payload:
-            payload['order'] = 'desc'
-        elif payload.get('order') != 'desc':
+        if "order" not in payload:
+            payload["order"] = "desc"
+        elif payload.get("order") != "desc":
             err_msg = "Support for non-default order has not been implemented as it may cause unexpected results"
-            raise NotImplementedError(err_msg)   
+            raise NotImplementedError(err_msg)
 
-        if 'until' not in payload:
-            payload['until'] = int(dt.datetime.now().timestamp())
-        if 'filter' in payload:
-            if not isinstance(payload['filter'], list):
-                if isinstance(payload['filter'], str):
-                    payload['filter'] = [payload['filter']]
+        if "until" not in payload:
+            payload["until"] = int(dt.datetime.now().timestamp())
+        if "filter" in payload:
+            if not isinstance(payload["filter"], list):
+                if isinstance(payload["filter"], str):
+                    payload["filter"] = [payload["filter"]]
                 else:
-                    payload['filter'] = list(payload['filter'])
+                    payload["filter"] = list(payload["filter"])
 
             # make sure that the created_utc field is returned
-            if 'created_utc' not in payload['filter']:
-                payload['filter'].append('created_utc')
-            
+            if "created_utc" not in payload["filter"]:
+                payload["filter"].append("created_utc")
+
             # there is a bug where multiple filters like:
             # filter=<field>&filter=<field2>
             # only returns field2
-            payload['filter'] = ','.join(payload['filter'])
+            payload["filter"] = ",".join(payload["filter"])
 
     def gen_slices(self, url, payload, after, before, num):
         # create time slices
         ts = timeslice(after, before, num)
-        url_payloads = [(url, mapslice(copy.deepcopy(payload),
-                                       ts[i], ts[i+1])) for i in range(num)]
+        url_payloads = [
+            (url, mapslice(copy.deepcopy(payload), ts[i], ts[i + 1]))
+            for i in range(num)
+        ]
         self.req_list.extend(url_payloads)
 
     def gen_url_payloads(self, url, batch_size, search_window):
@@ -230,24 +253,23 @@ class Request:
         # check if new payloads have to be made
         if len(self.req_list) == 0:
             # paging for ids
-            if 'ids' in self.payload:
+            if "ids" in self.payload:
 
                 # convert ids to list
                 self._id_list(self.payload)
 
-                all_ids = self.payload['ids']
+                all_ids = self.payload["ids"]
                 if len(all_ids) == 0 and (self.limit and self.limit > 0):
-                    warnings.warn(
-                        f'{self.limit} items were not found in Pushshift')
+                    warnings.warn(f"{self.limit} items were not found in Pushshift")
                 self.limit = len(all_ids)
 
                 # remove ids from payload to prevent , -> %2C and increasing query length
                 # beyond the max length of 8190
-                self.payload['ids'] = []
+                self.payload["ids"] = []
 
                 # if searching for submission comment ids
                 if self.kind == "submission_comment_ids":
-                    urls = [url+sub_id for sub_id in all_ids]
+                    urls = [url + sub_id for sub_id in all_ids]
                     url_payloads = [(url, self.payload) for url in urls]
                 else:
                     # split ids into arrays of size max_ids_per_request
@@ -257,43 +279,44 @@ class Request:
                         ids_split.append(",".join(all_ids[:max_len]))
                         all_ids = all_ids[max_len:]
 
-                    log.debug(f'Created {len(ids_split)} id slices')
+                    log.debug(f"Created {len(ids_split)} id slices")
 
                     # create url payload tuples
-                    url_payloads = [(url + '?ids=' + id_str, self.payload)
-                                    for id_str in ids_split]
+                    url_payloads = [
+                        (url + "?ids=" + id_str, self.payload) for id_str in ids_split
+                    ]
                 # add payloads to req_list
                 self.req_list.extend(url_payloads)
 
             else:
-                if 'since' not in self.payload:
+                if "since" not in self.payload:
                     search_window = dt.timedelta(days=search_window)
                     num = batch_size
-                    before = self.payload['until']
-                    after = int((dt.datetime.fromtimestamp(
-                        before) - search_window).timestamp())
+                    before = self.payload["until"]
+                    after = int(
+                        (dt.datetime.fromtimestamp(before) - search_window).timestamp()
+                    )
 
                     # set before to after for future time slices
-                    self.payload['until'] = after
+                    self.payload["until"] = after
 
                 else:
-                    before = self.payload['until']
-                    after = self.payload['since']
+                    before = self.payload["until"]
+                    after = self.payload["since"]
 
                     # set before to avoid repeated time slices when there are missed responses
-                    self.payload['until'] = after
+                    self.payload["until"] = after
                     num = batch_size
 
                 # generate payloads
-                self.gen_slices(
-                    url, self.payload, after, before, num)
+                self.gen_slices(url, self.payload, after, before, num)
 
     def _id_list(self, payload):
-        if not isinstance(payload['ids'], list):
-            if isinstance(payload['ids'], str):
-                payload['ids'] = [payload['ids']]
+        if not isinstance(payload["ids"], list):
+            if isinstance(payload["ids"], str):
+                payload["ids"] = [payload["ids"]]
             else:
-                payload['ids'] = list(payload['ids'])
+                payload["ids"] = list(payload["ids"])
 
     def trim(self):
         if self.limit:
@@ -305,6 +328,6 @@ class Request:
                     except IndexError as exc:
                         break
             if self.limit < 0:
-                log.debug(f'Trimming {self.limit*-1} requests')
-                self.resp.responses = self.resp.responses[:self.limit]
+                log.debug(f"Trimming {self.limit*-1} requests")
+                self.resp.responses = self.resp.responses[: self.limit]
                 self.limit = 0

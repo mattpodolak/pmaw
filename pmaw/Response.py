@@ -17,7 +17,7 @@ class Response(Generator):
         # indexing for returning responses
         self.i = 0
         self.num_cache = 0
-    
+
     @staticmethod
     def load_cache(key, cache_dir=None):
         """
@@ -49,7 +49,7 @@ class Response(Generator):
             self.num_cache += 1
             # increase num returned to reflect responses retrieved from cache
             # as well as previously returned responses
-            self.num_returned += (self.i + len(self.responses))
+            self.num_returned += self.i + len(self.responses)
             self.i = 0
             return self._next_resp()
         else:
@@ -60,13 +60,15 @@ class Response(Generator):
         self.close()
 
     def throw(self, type=None, value=None, traceback=None):
-        log.debug('Cleaning up responses')
+        log.debug("Cleaning up responses")
         self.responses.clear()
         raise StopIteration
 
     def __len__(self):
         if self._cache:
-            length = len(self.responses) + self._cache.size - (self.i + self.num_returned)
+            length = (
+                len(self.responses) + self._cache.size - (self.i + self.num_returned)
+            )
         else:
             length = len(self.responses) - self.i
 

@@ -5,9 +5,9 @@
 """
 PMAW: Pushshift Multithread API Wrapper
 """
-__version__ = '3.0.0'
-__author__ = 'Matthew Podolak'
-__license__ = 'MIT'
+__version__ = "3.0.0"
+__author__ = "Matthew Podolak"
+__license__ = "MIT"
 
 from .RateLimit import RateLimit
 from .Request import Request
