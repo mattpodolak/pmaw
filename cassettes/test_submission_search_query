@@ -4967,8 +4967,6 @@ interactions:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=%2BgSMmxSzW8j7ySJAOKm06A82KspdrAlxufrGKBVXX4PVkdfKM1Rynj7ZjI2SrFysa7WDce3ZCKExGlZIoEtsfV%2BefXR9Hr4y2LFgb4IfWNNKcaVdUkP0buxVfe3qHStETLAW"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       alt-svc:
@@ -5081,8 +5079,6 @@ interactions:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=RJ4Sen%2F5gEnvmlDLEu4dJXlWsglmFgzOA4k6obI4ug6j54fNex4P7w%2BI9YJG3R2Kg6Lwl4boQ1PkBtsQELKB1jQdBL9U2X9Ja4ukjucftXbHmuE1HQfv%2FLwXPNJAL7%2F%2B16yt"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       alt-svc:
@@ -5138,8 +5134,6 @@ interactions:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=fvD711ATly327Q0aLpM0ydr6BLVWKsTWYLWNtJ59XYBA%2FM8D8ATvzqT%2BPfymFgF89wu%2FbEuDjtI71SPaJlN%2BefYBVVDEWUmk28mFXDEScglRZX8KSRnnt3INakkv%2FHkaMSlU"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       alt-svc:
@@ -5195,8 +5189,6 @@ interactions:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=x4GvH4VNb1K5Tu9L2YzYM8u7W77W3wXZSoPJHgzLkIb8bCslRFZSd0RXfim0E%2FlGTlwUBLMngmHAqL9rzqQT5S1hgpjeQHJ9jOCl%2BbAQuZP49hgEmS9lQXMt55ow2SusrF1v"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       alt-svc:
@@ -5252,8 +5244,6 @@ interactions:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=0X8HTY2cJbqkJlgEnHAz%2FEFUksE9u4D%2BKzmF51WJt4LRLRCBKvID8ppFRdd2FqRo5KX7%2BG4SpLIhmEQZbqrMONBFMZ6FSisQ5M0KCwEvaBtAVQ%2BMmyg09uPBRf5ZBO6YmjOU"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       alt-svc:
@@ -5309,8 +5299,6 @@ interactions:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=WrevFrj72wzBkyxKh07%2FPVU7EFNFUs3Ql3q2oGpKy%2B%2FBVtbLOOFCDLZ1Qbla4lsIyJV4IGKfKxrwku4rkRCJ6yHdvny42lGbnC1WTcxegWy%2FeUfL03GwrRMP%2B3kHyR3%2FmJuG"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       alt-svc:
@@ -5657,8 +5645,6 @@ interactions:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=r6q30AneUM4AtBBVkgZOApcONv1aRLxtxAA%2Fjk9SdMUpOuSw%2Fp1dcCLNl57QpXwSpHrizW9jo4gfUAGQr8YOXAdG0BAa0Uh4ivYnMOknaAdepcN8JMmmygfZFfx%2BTRGo04G1"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       alt-svc:
@@ -6515,6 +6501,118 @@ interactions:
       - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
       Report-To:
       - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=u%2BZDmH9Jy5v83lF5udlDARfRWD2B7%2FWGd%2B%2Fix4UQu3XYpnqvCgbyO1%2FhSAjF9q7QzCYrAr6DgUlrT6O4R4gyFvc5jVYKNHBa%2BbY1bmUrawyYESjMUG35Jfw3ix1zH6Hvq4uZ"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Vary:
+      - Accept-Encoding
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400
+      cache-control:
+      - public, max-age=2, s-maxage=2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.26.0
+    method: GET
+    uri: https://api.pushshift.io/reddit/submission/search?q=java&subreddit=programming&limit=100&until=1649751957&size=100&track_total_hits=True&sort=created_utc&order=desc&since=1646598357
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA32R0W7jIBBF/+U+8+Bsk3bDr4TIombssMV2CkPVrsW/rwAnijZpXyw83Lkzl7PA
+        aNaQh6MAeT97yCk6JzAS63q1gEL+8jy/QW62AmxHMu0cGbLXLpBAG07am1XG2kFuBULsOgqhj+vv
+        mz2fyUA+CfTaunxsksDJ8m3jgg/tIkE2Ap6cZjtPkKB3JIFRf7ahmz3VNVMSoNC+R/JfxcLr7q0t
+        Rm21ZR9JINi/BLlpGoGr9nWey7QxBoY8PCgEO54dVfc2sLfTkO97Sy5HPYAtO4JAINczfTKOV3/8
+        0R8aAoZ6HR2385m85vy80JNBSmKB19NA2bHzpJlMG7nLvwPnZZ+3z7v976fdS9M06Ue94yLfv+w2
+        +4v8WDoukcJpjs6UUKPm7lRq8dWTMZYhcfbz4PU45oQpHQVGO9kxjm1tbNemTfWFHoZMLAmE2fPd
+        RjAUOtyy+QWJRd3hUSsfVQCpSkjVJ1SQiyoB6ilTUTnBN8UHsKqm4soqVYEp5IErMoXjzURVsBXB
+        /+DKrZ6MKuxUhVEn3ISvhYFLmDuCP3c5Vt9wvI1ciayhC5e1fsFZFr0BqgpR9RCpujJVBaoqVFXB
+        +mhLVdBmR6T0D+/okNM7BAAA
+    headers:
+      CF-Cache-Status:
+      - MISS
+      CF-RAY:
+      - 77e6d298fa815443-YYZ
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 24 Dec 2022 05:09:04 GMT
+      Last-Modified:
+      - Sat, 24 Dec 2022 05:09:04 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=AHJRC5ZNcG8uCRaiNlRrc3kXXdYjqFJcChcx%2F9WS4rLXu7SDH%2BxzqcJUiSFKDAlQajPYmTgK5XTpAW%2FMkGts6C0iiXj4VRr%2BdYmc3YBJLsS4e52bAHWj6WOi%2BLoENCdR3B7Y"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400
+      cache-control:
+      - public, max-age=2, s-maxage=2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.26.0
+    method: GET
+    uri: https://api.pushshift.io/reddit/submission/search?q=java&subreddit=programming&limit=100&until=1643444757&size=100&track_total_hits=True&sort=created_utc&order=desc&since=1640291157
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA32R0W7jIBBF/+U+8+C02Y2WXwmRRc3YYYPtFIaquxb/vgKcyNqkfbHwcOfOXM4C
+        o1lDHk8C5P3sIafonMBIrOvVAgr5y/N8gdwdBNiOZNo5MmSvXSCBNpy1N6uMtYPcC4TYdRRCH9ff
+        i71eyUC+CvTaunxsksDZ8rZxwYd2kSAbAU9Os50nSNA7ksCoP9vQzZ7qmikJUGjfI/k/xcLr7tIW
+        o7baso8kEOxfgtw1jcBd+zbPZdoYA0MenxSCHa+Oqnsb2NtpyPe9JZejHsGWHUEgkOuZPhmnuz9+
+        6w8NAUO9jo7b+Upec35e6MkgJbHA62mg7Nh50kymjdzl34Hzsj/3zcuv3e7HoWma9K3ecZG/7vf7
+        w01+Kh23SOE8R2dKqFFzdy61+ObJGMuQuPp58Hocc8KUTgKjnewYx7Y2tmvTrvpCD0MmlgTC7Plh
+        IxgKHbZsXiCxqAc8auWjCiBVCan6hApyUSVAPWUqKif4ovgEVtVUXFmlKjCFPHBFpnDaTFQFWxH8
+        D67c6smowk5VGHXCJnwtDFzCPBD8vsux+oLjNnIlsoYuXNb6DWdZdANUFaLqKVJ1Z6oKVFWoqoL1
+        2ZaqoM2OSOkfel45TjsEAAA=
+    headers:
+      CF-Cache-Status:
+      - EXPIRED
+      CF-RAY:
+      - 77e6d5002b6fa24d-YYZ
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 24 Dec 2022 05:10:46 GMT
+      Last-Modified:
+      - Sat, 24 Dec 2022 05:09:05 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=g9i2rZgTA4qBytfSfOdEtW4PeVRxuKdn%2BgXV9faotl4U7kJEApOoNqUnzmMwjsJHn9k70In93UoqV%2Bp13%2B0q2qyiFv0IFRbRlOYez9wGa6h8zaNW38KG6YUuJDSbkwQffICB"}],"group":"cf-nel","max_age":604800}'
       Server:
       - cloudflare
       Transfer-Encoding:
