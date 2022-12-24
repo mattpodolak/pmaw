@@ -80,4 +80,93 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.27.1
+    method: GET
+    uri: https://api.pushshift.io/reddit/comment/search?ids=gjacwx5,gjad2l6,gjadatw,gjadc7w,gjadcwh,gjadgd7,gjadlbc,gjadnoc,gjadog1,gjadphb
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      CF-Cache-Status:
+      - MISS
+      CF-RAY:
+      - 77e250a3cea8631b-ORD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - br
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 23 Dec 2022 16:01:18 GMT
+      Last-Modified:
+      - Fri, 23 Dec 2022 16:01:18 GMT
+      NEL:
+      - '{"success_fraction":0,"report_to":"cf-nel","max_age":604800}'
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=835NiN55EVxnuClXF%2BUSb2nsN5Yys18h5BmXbV4xZPcAGwBnvP4Tm5O7M75FjnT3Zr9db8p9LoLEXjb77ivbO7VccUUqCTnYbhfI1bUegIiPd2f5tfAGYYH5gbBUQnxwmO0d"}],"group":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      alt-svc:
+      - h3=":443"; ma=86400, h3-29=":443"; ma=86400
+      cache-control:
+      - public, max-age=2, s-maxage=2
+    status:
+      code: 200
+      message: OK
 version: 1

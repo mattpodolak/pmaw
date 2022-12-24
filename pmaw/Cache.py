@@ -10,6 +10,7 @@ import gzip
 
 log = logging.getLogger(__name__)
 
+
 class Cache:
     """Cache: Handle storing and loading request info and responses in the cache"""
 
@@ -19,7 +20,7 @@ class Cache:
             # generating key
             key_str = json.dumps(payload, sort_keys=True).encode("utf-8")
             self.key = hashlib.md5(key_str).hexdigest()
-            log.info(f'Response cache key: {self.key}')
+            log.info(f"Response cache key: {self.key}")
         else:
             self.key = key
 
@@ -31,7 +32,7 @@ class Cache:
         self.size = 0
         if safe_exit:
             self.check_cache()
-    
+
     @staticmethod
     def load_with_key(key, cache_dir=None):
         return Cache({}, True, cache_dir, key)
@@ -41,37 +42,34 @@ class Cache:
             num_resp = len(responses)
             checkpoint = len(self.response_cache) + 1
             self.size += num_resp
-            log.debug(
-                f'File Checkpoint {checkpoint}:: Caching {num_resp} Responses')
+            log.debug(f"File Checkpoint {checkpoint}:: Caching {num_resp} Responses")
 
-            filename = f'{checkpoint}-{self.key}-{num_resp}.pickle.gz'
+            filename = f"{checkpoint}-{self.key}-{num_resp}.pickle.gz"
             self.response_cache.append(filename)
 
-            with gzip.open(f'{self.folder}/{filename}', 'wb') as handle:
-                pickle.dump(responses, handle,
-                            protocol=pickle.HIGHEST_PROTOCOL)
+            with gzip.open(f"{self.folder}/{filename}", "wb") as handle:
+                pickle.dump(responses, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     def load_info(self):
         try:
-            with gzip.open(f'{self.folder}/{self.key}_info.pickle.gz', 'rb') as handle:
+            with gzip.open(f"{self.folder}/{self.key}_info.pickle.gz", "rb") as handle:
                 return pickle.load(handle)
         except FileNotFoundError:
-            log.info('No previous requests to load')
+            log.info("No previous requests to load")
             return None
 
     def load_resp(self, cache_num):
         filename = self.response_cache[cache_num]
         try:
-            with gzip.open(f'{self.folder}/{filename}', 'rb') as handle:
+            with gzip.open(f"{self.folder}/{filename}", "rb") as handle:
                 return pickle.load(handle)
         except FileNotFoundError as exc:
-            warnings.warn(f'Failed to load responses from {filename} - {exc}')
+            warnings.warn(f"Failed to load responses from {filename} - {exc}")
 
     def save_info(self, **kwargs):
-        filename = f'{self.folder}/{self.key}_info.pickle.gz'
-        with gzip.open(filename, 'wb') as handle:
-            pickle.dump(kwargs, handle,
-                        protocol=pickle.HIGHEST_PROTOCOL)
+        filename = f"{self.folder}/{self.key}_info.pickle.gz"
+        with gzip.open(filename, "wb") as handle:
+            pickle.dump(kwargs, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     def check_cache(self):
         for filename in os.listdir(self.folder):

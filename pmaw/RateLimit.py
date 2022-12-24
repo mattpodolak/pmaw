@@ -8,7 +8,14 @@ log = logging.getLogger(__name__)
 class RateLimit:
     """RateLimit: Implements different rate-limiting strategies for concurrent requests"""
 
-    def __init__(self, rate_limit=60, base_backoff=0.5, limit_type='average', max_sleep=60, jitter=None):
+    def __init__(
+        self,
+        rate_limit=60,
+        base_backoff=0.5,
+        limit_type="average",
+        max_sleep=60,
+        jitter=None,
+    ):
         self.rate_limit = rate_limit
         self.cache = list()
         self.base = base_backoff
@@ -24,9 +31,9 @@ class RateLimit:
 
     def delay(self):
         if self.limit_type:
-            if self.limit_type == 'average':
+            if self.limit_type == "average":
                 return min(self.max_sleep, self._average())
-            elif self.limit_type == 'backoff':
+            elif self.limit_type == "backoff":
                 return self._backoff()
         else:
             return 0
@@ -49,19 +56,20 @@ class RateLimit:
             self.attempts += 1
 
     def _expo(self):
-        return min(self.max_sleep, self.base*pow(2, self.attempts))
+        return min(self.max_sleep, self.base * pow(2, self.attempts))
 
     def _backoff(self):
         if self.jitter:
-            if self.jitter == 'equal':
+            if self.jitter == "equal":
                 v = self._expo()
-                return v/2 + random.uniform(0, v/2)
-            elif self.jitter == 'full':
+                return v / 2 + random.uniform(0, v / 2)
+            elif self.jitter == "full":
                 v = self._expo()
                 return random.uniform(0, v)
-            elif self.jitter == 'decorr':
-                self.sleep = min(self.max_sleep, random.uniform(
-                    self.base, self.sleep*3))
+            elif self.jitter == "decorr":
+                self.sleep = min(
+                    self.max_sleep, random.uniform(self.base, self.sleep * 3)
+                )
                 return self.sleep
         else:
             return self._expo()
@@ -81,7 +89,7 @@ class RateLimit:
             try:
                 self.cache.remove(first_req)
             except ValueError:
-                log.debug(f'{first_req} has already been removed RL cache')
+                log.debug(f"{first_req} has already been removed RL cache")
 
             num_req = len(self.cache)
             first_req = min(self.cache)
@@ -93,10 +101,10 @@ class RateLimit:
             period = last_req - first_req
 
             # project rate with no delay
-            proj_rate = 60*(num_req)/(period)
+            proj_rate = 60 * (num_req) / (period)
 
             # check if projected rate is too high
-            if(proj_rate < self.rate_limit or num_req < 5):
+            if proj_rate < self.rate_limit or num_req < 5:
                 return 0
             else:
-                return 60*(num_req)/self.rate_limit - period
+                return 60 * (num_req) / self.rate_limit - period

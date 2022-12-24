@@ -6,7 +6,7 @@ class PushshiftAPI(PushshiftAPIBase):
         """
         Helper class for interacting with the PushShift API for searching public reddit archival data using multiple threads.
 
-        Input: 
+        Input:
 
             num_workers (int, optional) - Number of workers to use for multithreading, defaults to 10.
             max_sleep (int, optional) - Maximum rate-limit sleep time (in seconds) between requests, defaults to 60s.
@@ -35,10 +35,12 @@ class PushshiftAPI(PushshiftAPIBase):
         Output:
             Response generator object
         """
-        kwargs['ids'] = ids
-        if('filter_fn' in kwargs):
-            raise ValueError('filter_fn not supported for search_submission_comment_ids')
-        return self._search( kind='submission_comment_ids', **kwargs)
+        kwargs["ids"] = ids
+        if "filter_fn" in kwargs:
+            raise ValueError(
+                "filter_fn not supported for search_submission_comment_ids"
+            )
+        return self._search(kind="submission_comment_ids", **kwargs)
 
     def search_comments(self, **kwargs):
         """
@@ -55,7 +57,7 @@ class PushshiftAPI(PushshiftAPIBase):
         Output:
             Response generator object
         """
-        return self._search(kind='comment', **kwargs)
+        return self._search(kind="comment", **kwargs)
 
     def search_submissions(self, **kwargs):
         """
@@ -72,4 +74,4 @@ class PushshiftAPI(PushshiftAPIBase):
         Output:
             Response generator object
         """
-        return self._search(kind='submission', **kwargs)
+        return self._search(kind="submission", **kwargs)
