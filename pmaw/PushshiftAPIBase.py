@@ -12,7 +12,7 @@ from pmaw.Request import Request
 
 
 log = logging.getLogger(__name__)
-
+logging.basicConfig(level=logging.INFO)
 
 class PushshiftAPIBase:
     _base_url = "https://{domain}.pushshift.io/{{endpoint}}"
